@@ -69,7 +69,13 @@ That commit also contains the SciRIFF converter, the Kaggle notebook, and these 
 
 ## Kaggle, when you are ready
 
-1. Upload `notebooks/skex_kaggle.ipynb`.
-2. Settings: Internet on, one T4. Do not enable a second GPU.
-3. Upload the `Dataset/` folder as a Kaggle dataset and attach it.
-4. Run the notebook. It clones the GitHub repo. The second smoke cell must print SKIP after the first smoke succeeds on that machine.
+Dataset name / slug to type on Kaggle: `skex-datasets`
+
+Zip to upload: `C:\Users\PC1\Desktop\Specialization Beats Scale G\skex-datasets.zip`
+
+Kaggle extracts it to `/kaggle/input/skex-datasets/`. The notebook requires that exact slug. One zip holds every source (SciRIFF, SciER, SciERC, CORD text, and the processed Domain-A JSONL). The runner only copies `processed/domain_a`.
+
+1. Create a Kaggle dataset named `skex-datasets` and upload that zip.
+2. Upload `notebooks/skex_kaggle.ipynb`. Add Data -> `skex-datasets`.
+3. Settings: Internet on, one T4. Do not enable a second GPU.
+4. Run all cells. The data cell must print the five paths and the Domain-A row counts before smoke runs.

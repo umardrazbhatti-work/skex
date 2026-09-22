@@ -17,6 +17,6 @@ What lands here:
 - `cord/text/` — CORD-v2 `ground_truth` text only (800/100/100). Receipt images are not kept.
 - `processed/domain_a/` — SciRIFF mapped to the research card (344/50/99).
 
-Upload this folder as one Kaggle dataset. Do not put model weights in it.
+Upload one Kaggle dataset named `skex-datasets` (that exact slug) using `skex-datasets.zip`. Do not put model weights in it.
 
 The inspection write-up is `docs/DATASET_INSPECTION.md`.
