@@ -73,6 +73,12 @@ That commit also contains the SciRIFF converter, the Kaggle notebook, and these 
 - Domain B converter is not written. Freeze stays `cord` in `configs/default.yaml`.
 - SciER and raw SciERC are downloaded only. They are not converted.
 
+## Kaggle run 22-9-26 14:25
+
+Log and zip: `Results/22-9-26 1425Hrs/`. Verdict: plumbing pass. Not a paper result.
+
+Dataset path worked. Domain A 344 / 50 / 99. Pytest 11 passed. Smoke `20260922T090235Z-fcb52a` succeeded on one real dev row (`scierc_ner:validation:0`) with the dummy empty card: schema valid, field F1 0, wrong-valid 1. Second call skipped the same fingerprint. `skex-output.zip` was written (11 files) and is in the Results folder. No GPU was attached. Do not cite these metrics as model performance.
+
 ## Kaggle run 22-9-26 14:15
 
 Log: `Results/22-9-26 1415Hrs/specialization-beats-scale.log`.
