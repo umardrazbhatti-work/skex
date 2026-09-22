@@ -10,8 +10,8 @@ data:
   pack_priority: [title, abstract, method, experiments, limitations]
 
 models:
-  probe: meta-llama/Llama-3.2-1B-Instruct
-  primary: meta-llama/Llama-3.2-3B-Instruct
+  probe: Qwen/Qwen2.5-1.5B-Instruct
+  primary: Qwen/Qwen2.5-3B-Instruct
   ceiling: Qwen/Qwen2.5-7B-Instruct
   encoder: allenai/scibert_scivocab_uncased
   generalist_id: gpt-4.1

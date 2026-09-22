@@ -1,11 +1,11 @@
 # Human-readable model card. IDs must match configs/default.yaml.
 probe:
-  id: meta-llama/Llama-3.2-1B-Instruct
+  id: Qwen/Qwen2.5-1.5B-Instruct
   role: capacity probe — tax should be worst here
 primary:
-  id: meta-llama/Llama-3.2-3B-Instruct
-  alt: Qwen/Qwen2.5-3B-Instruct
-  role: default specialist
+  id: Qwen/Qwen2.5-3B-Instruct
+  alt: meta-llama/Llama-3.2-3B-Instruct
+  role: default specialist. Llama is gated and needs HF_TOKEN.
 ceiling:
   id: Qwen/Qwen2.5-7B-Instruct
   alt: microsoft/Phi-3.5-mini-instruct

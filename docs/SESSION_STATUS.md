@@ -73,6 +73,10 @@ That commit also contains the SciRIFF converter, the Kaggle notebook, and these 
 - Domain B converter is not written. Freeze stays `cord` in `configs/default.yaml`.
 - SciER and raw SciERC are downloaded only. They are not converted.
 
+## Kaggle run 22-9-26 14:45
+
+Log: `Results/22-9-26 1445Hrs/`. Two T4s were visible and accepted. Smoke passed. Plan 01 stopped because the notebook has no secret named `HF_TOKEN` (`No user secrets exist ... label HF_TOKEN`). Llama 3.2 cannot be downloaded without that secret. Plan 01 now uses public `Qwen/Qwen2.5-1.5B-Instruct` and `Qwen/Qwen2.5-3B-Instruct`. No token required.
+
 ## Kaggle run 22-9-26 14:30
 
 Log: `Results/22-9-26 1430Hrs/`. Smoke passed again. Plan 01 did not start. The session had no GPU (`nvidia-smi` missing). The cell stopped before Llama. This account cannot switch the accelerator off T4 x2. That is accepted. The notebook now pins `CUDA_VISIBLE_DEVICES=0` and does not refuse two T4s. A CPU session still cannot run plan 01.
