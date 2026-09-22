@@ -2,6 +2,33 @@
 
 Read this file first at the next session, then `GROK.md`, `docs/LOCKED_DECISIONS.md`, `docs/EXECUTION_PLAN.md`, and `docs/DATASET_INSPECTION.md`.
 
+## Resume here — saved 2026-09-22 15:36 local
+
+Git `main` is `42fd4fc` and that commit is on GitHub. A Kaggle run was still in progress when this note was written. It has no Results folder yet. Do not invent its outcome.
+
+When the user returns, look in `C:\Users\PC1\Desktop\Specialization Beats Scale G\Results` for a subfolder newer than `22-9-26 1515Hrs`. Read that folder before editing code. The run they left running is the retry of plan 01 after the prompt-JSON tensor fix.
+
+What that run is supposed to do:
+
+- Accelerator is GPU T4 x2. Use GPU 0 only. Do not ask them to switch to T4 x1.
+- Models are public Qwen, not Llama: `Qwen/Qwen2.5-1.5B-Instruct` and `Qwen/Qwen2.5-3B-Instruct`. No `HF_TOKEN` is required for this run.
+- Four cells, 50 Domain-A dev papers each. Prompt-JSON versus Outlines. No QLoRA. No 7B.
+- Notebook: `notebooks/skex_kaggle.ipynb`. Dataset mount: `/kaggle/input/datasets/umardrazbhatti/skex-datasets`.
+- The notebook passes `--retry-failed`. On a fresh Kaggle disk the registry is empty, so all four cells may run again. On a kept disk, the two Outlines cells below must stay skipped.
+
+Already finished, from `Results/22-9-26 1515Hrs`. Do not quote these as the prompt-JSON arm:
+
+| Fingerprint | Cell | Model | Status | Note |
+|---|---|---|---|---|
+| `5ea1cba6acc2e8a2` | B constrained | Qwen2.5 1.5B | succeeded | 50 docs, field F1 0.118, wrong-valid 1.0 |
+| `85edb1fb3d92e4c8` | B constrained | Qwen2.5 3B | succeeded | 50 docs, field F1 0.211, wrong-valid 1.0 |
+| `998f8fafc5edf958` | A prompt-JSON | Qwen2.5 1.5B | failed | token-dict crash, fixed in `42fd4fc` |
+| `cb0d9b71c2836671` | A prompt-JSON | Qwen2.5 3B | failed | same crash |
+
+The 15:15 crash was `AttributeError: shape` in `src/skex/decode/interface.py`. `apply_chat_template` returned a token dict and `model.generate` treated it as a tensor. `chat_tensors()` now unpacks `input_ids`. Tests at save time: 16 passed.
+
+Next session, after the new Results folder is present: read the log and `skex-output/RUN.txt`, say whether both prompt-JSON cells succeeded, and only then compare them with the Outlines numbers above. Do not start plan 02. Do not install Unsloth. Do not download a 7B.
+
 ## Results folder (fixed)
 
 `C:\Users\PC1\Desktop\Specialization Beats Scale G\Results`
