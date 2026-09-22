@@ -73,6 +73,12 @@ That commit also contains the SciRIFF converter, the Kaggle notebook, and these 
 - Domain B converter is not written. Freeze stays `cord` in `configs/default.yaml`.
 - SciER and raw SciERC are downloaded only. They are not converted.
 
+## Kaggle run 22-9-26 14:15
+
+Log: `Results/22-9-26 1415Hrs/specialization-beats-scale.log`.
+
+The run succeeded. Dataset paths resolved. Domain A copied: 344 / 50 / 99. Pytest: 11 passed. First smoke wrote `20260922T085500Z-7f6443` (`OK`, f1=0.000 on the dummy smoke cell). Second smoke printed `SKIP`. No GPU was visible. There is no zip in that Results folder because the notebook never built one. Kaggle's log download does not include `outputs/runs/`. The notebook now writes `/kaggle/working/skex-output.zip` after the smoke cell. Re-upload `notebooks/skex_kaggle.ipynb`, then download that zip from the Output tab into the Results subfolder next to the log.
+
 ## Kaggle run 22-9-26 14:00
 
 Log: `Results/22-9-26 1400Hrs/specialization-beats-scale.log`.
