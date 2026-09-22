@@ -75,13 +75,13 @@ That commit also contains the SciRIFF converter, the Kaggle notebook, and these 
 
 ## Kaggle run 22-9-26 14:30
 
-Log: `Results/22-9-26 1430Hrs/`. Smoke passed again. Plan 01 did not start. The session had no GPU (`nvidia-smi` missing). The cell stopped with `Plan 01 needs one T4`. That is a session setting, not a model bug. Next run must use Accelerator GPU T4 x1. Notebook metadata now requests `nvidiaTeslaT4`.
+Log: `Results/22-9-26 1430Hrs/`. Smoke passed again. Plan 01 did not start. The session had no GPU (`nvidia-smi` missing). The cell stopped before Llama. This account cannot switch the accelerator off T4 x2. That is accepted. The notebook now pins `CUDA_VISIBLE_DEVICES=0` and does not refuse two T4s. A CPU session still cannot run plan 01.
 
 ## Next: plan 01, untouched models
 
 Wired in code, not run yet. `experiments/plans/01_tax_zeroshot.yaml` is four dev cells: Llama-3.2-1B and 3B, each with prompt-JSON and Outlines. Domain A dev has 50 rows, so each cell scores 50. No QLoRA. No 7B.
 
-The Kaggle notebook's last cell runs that plan. It needs Accelerator **GPU T4 x1** and a secret named `HF_TOKEN`. The Llama 3.2 license must be accepted on Hugging Face. The cell rewrites `/kaggle/working/skex-output.zip`.
+The Kaggle notebook's last cell runs that plan. Turn the Accelerator on. T4 x2 is accepted and only GPU 0 is used. A secret named `HF_TOKEN` is required. The Llama 3.2 license must be accepted on Hugging Face. The cell rewrites `/kaggle/working/skex-output.zip`.
 
 ## Kaggle run 22-9-26 14:25
 

@@ -33,9 +33,9 @@ def load_causal(model_id: str, *, fourbit: bool = True):
     from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
     if not torch.cuda.is_available():
-        raise RuntimeError(f"load_causal({model_id!r}) needs one CUDA GPU. Set the Kaggle accelerator to GPU T4 x1.")
+        raise RuntimeError(f"load_causal({model_id!r}) needs a CUDA GPU. Turn the Kaggle accelerator on. T4 x2 is accepted.")
     if torch.cuda.device_count() > 1:
-        print("WARNING: more than one GPU is visible. Weights stay on cuda:0. A 2x T4 session still costs double quota.")
+        print("More than one GPU is visible. Weights stay on cuda:0.")
     quant = None
     if fourbit:
         quant = BitsAndBytesConfig(
