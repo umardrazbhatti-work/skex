@@ -67,6 +67,14 @@ That commit also contains the SciRIFF converter, the Kaggle notebook, and these 
 - Domain B converter is not written. Freeze stays `cord` in `configs/default.yaml`.
 - SciER and raw SciERC are downloaded only. They are not converted.
 
+## Kaggle run 22-9-26 14:00
+
+Log: `Results/22-9-26 1400Hrs/specialization-beats-scale.log`.
+
+Failed in cell 1 before any dataset load. Kaggle showed two T4s (`GPU 0` and `GPU 1`). The notebook raised `SystemExit: Stop. Expected one T4, found 2.` The dataset path was never reached.
+
+The notebook no longer aborts a non-training run for that. It warns and sets `CUDA_VISIBLE_DEVICES=0`. A 2x T4 session still costs double quota until the Accelerator is set to GPU T4 x1. Re-upload `notebooks/skex_kaggle.ipynb` before the next Save & Run.
+
 ## Kaggle, when you are ready
 
 Dataset name / slug to type on Kaggle: `skex-datasets`
