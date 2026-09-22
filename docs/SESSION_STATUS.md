@@ -87,7 +87,7 @@ Dataset name / slug to type on Kaggle: `skex-datasets`
 
 Zip to upload: `C:\Users\PC1\Desktop\Specialization Beats Scale G\skex-datasets.zip`
 
-Kaggle extracts it to `/kaggle/input/skex-datasets/`. The notebook requires that exact slug. One zip holds every source (SciRIFF, SciER, SciERC, CORD text, and the processed Domain-A JSONL). The runner only copies `processed/domain_a`.
+Kaggle mounts this account's copy at `/kaggle/input/datasets/umardrazbhatti/skex-datasets`. The notebook uses that path, not `/kaggle/input/skex-datasets`. One zip holds every source (SciRIFF, SciER, SciERC, CORD text, and the processed Domain-A JSONL). The runner only copies `processed/domain_a`.
 
 1. Create a Kaggle dataset named `skex-datasets` and upload that zip.
 2. Upload `notebooks/skex_kaggle.ipynb`. Add Data -> `skex-datasets`.
