@@ -2,6 +2,12 @@
 
 Read this file first at the next session, then `GROK.md`, `docs/LOCKED_DECISIONS.md`, `docs/EXECUTION_PLAN.md`, and `docs/DATASET_INSPECTION.md`.
 
+## Results folder (fixed)
+
+`C:\Users\PC1\Desktop\Specialization Beats Scale G\Results`
+
+This path stays the same. Each Kaggle run is a new subfolder with its own name. The first run is `22-9-26 1400Hrs` (dual T4 abort, before the dataset cell). When a new run is added, read that subfolder before changing the notebook or the loader. Do not move this directory.
+
 Date: 2026-09-22. Topic is closed. Do not write a new research proposal.
 
 `AGENTS.md`, `docs/GITHUB.md`, and `docs/KAGGLE.md` were not in the tree. Operating rules are in `GROK.md` and `docs/LOCKED_DECISIONS.md`.

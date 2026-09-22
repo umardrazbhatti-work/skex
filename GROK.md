@@ -4,6 +4,12 @@ Read `AGENTS.md` first, then `docs/LOCKED_DECISIONS.md`, then `docs/EXECUTION_PL
 
 You are Grok Code working in this VS Code workspace (`skex/`).
 
+Run logs from Kaggle live outside this repo. The parent path does not change:
+
+`C:\Users\PC1\Desktop\Specialization Beats Scale G\Results`
+
+Each run is a new subfolder there (the first one is `22-9-26 1400Hrs`). When the user says a run failed or names a new results folder, read that subfolder before editing code. Do not move or rename the Results directory.
+
 On every user request:
 1. State the smallest plan (files + commands).
 2. Check `experiments/registry.jsonl` so you do not repeat a failed or finished fingerprint.
