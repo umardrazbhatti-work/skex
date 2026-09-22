@@ -23,6 +23,21 @@ def test_other_engines_are_refused():
         generate("doc", arm="constrained", engine="xgrammar", model=object(), tokenizer=object())
 
 
+def test_chat_tensors_reads_a_token_dict_not_shape():
+    from skex.decode.interface import chat_tensors
+
+    class TokenDict(dict):
+        def __getattr__(self, name):
+            raise AttributeError(name)
+
+    ids, mask = chat_tensors(TokenDict(input_ids="IDS", attention_mask="MASK"))
+    assert ids == "IDS"
+    assert mask == "MASK"
+    bare, no_mask = chat_tensors("TENSOR")
+    assert bare == "TENSOR"
+    assert no_mask is None
+
+
 def test_prompt_keeps_document_separate_from_schema():
     messages = build_messages("Extract a card.", "We use BERT on CoNLL.", '{"type":"object"}')
     assert messages[1]["content"] == "We use BERT on CoNLL."

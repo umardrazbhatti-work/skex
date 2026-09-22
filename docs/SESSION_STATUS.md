@@ -73,6 +73,10 @@ That commit also contains the SciRIFF converter, the Kaggle notebook, and these 
 - Domain B converter is not written. Freeze stays `cord` in `configs/default.yaml`.
 - SciER and raw SciERC are downloaded only. They are not converted.
 
+## Kaggle run 22-9-26 15:15
+
+Log: `Results/22-9-26 1515Hrs/`. Two T4s worked. Qwen downloaded. The prompt-JSON cells crashed: `apply_chat_template` returned a token dict, and `model.generate` treated that dict as a tensor (`AttributeError: shape`). The Outlines cells finished all 50 dev rows: 1.5B field F1 0.118, 3B field F1 0.211. Both have wrong-valid 1.0. Those two succeeded fingerprints must not be repeated. The next run passes `--retry-failed`, so only the two prompt-JSON cells run again.
+
 ## Kaggle run 22-9-26 14:45
 
 Log: `Results/22-9-26 1445Hrs/`. Two T4s were visible and accepted. Smoke passed. Plan 01 stopped because the notebook has no secret named `HF_TOKEN` (`No user secrets exist ... label HF_TOKEN`). Llama 3.2 cannot be downloaded without that secret. Plan 01 now uses public `Qwen/Qwen2.5-1.5B-Instruct` and `Qwen/Qwen2.5-3B-Instruct`. No token required.

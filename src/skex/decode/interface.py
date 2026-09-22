@@ -83,25 +83,41 @@ def _render(tokenizer, messages: list[dict[str, str]], max_input_tokens: int):
         messages,
         add_generation_prompt=True,
         return_tensors="pt",
+        return_dict=True,
         truncation=True,
         max_length=max_input_tokens,
     )
 
 
-def _prompt_json(messages, model, tokenizer, *, max_new_tokens: int, max_input_tokens: int) -> str:
-    import torch
+def chat_tensors(rendered):
+    """Newer transformers returns a token dict, not a raw tensor. generate() needs the tensor."""
+    if hasattr(rendered, "keys") and "input_ids" in rendered:
+        mask = rendered["attention_mask"] if "attention_mask" in rendered else None
+        return rendered["input_ids"], mask
+    return rendered, None
 
-    inputs = _render(tokenizer, messages, max_input_tokens).to(model.device)
-    with torch.inference_mode():
+
+def _prompt_json(messages, model, tokenizer, *, max_new_tokens: int, max_input_tokens: int) -> str:
+    input_ids, attention_mask = chat_tensors(_render(tokenizer, messages, max_input_tokens))
+    input_ids = input_ids.to(model.device)
+    if attention_mask is not None:
+        attention_mask = attention_mask.to(model.device)
+    with torch_inference():
         output = model.generate(
-            inputs,
+            input_ids=input_ids,
+            attention_mask=attention_mask,
             max_new_tokens=max_new_tokens,
             do_sample=False,
             pad_token_id=tokenizer.pad_token_id,
         )
-    new_tokens = output[0, inputs.shape[-1]:]
-    _usage(int(inputs.shape[-1]), int(new_tokens.shape[-1]))
+    new_tokens = output[0, input_ids.shape[-1]:]
+    _usage(int(input_ids.shape[-1]), int(new_tokens.shape[-1]))
     return tokenizer.decode(new_tokens, skip_special_tokens=True)
+
+
+def torch_inference():
+    import torch
+    return torch.inference_mode()
 
 
 def _constrained(messages, model, tokenizer, *, max_new_tokens: int, max_input_tokens: int) -> str:
