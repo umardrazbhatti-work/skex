@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "skex://schemas/research_card.schema.json",
+  "title": "SKEX Research Card v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["task", "method", "datasets", "metrics", "scores", "claims", "limitations", "evidence_spans"],
+  "properties": {
+    "task": { "type": "array", "items": { "type": "string" } },
+    "method": { "type": "array", "items": { "type": "string" } },
+    "datasets": { "type": "array", "items": { "type": "string" } },
+    "metrics": { "type": "array", "items": { "type": "string" } },
+    "scores": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["metric", "value"],
+        "properties": {
+          "metric": { "type": "string" },
+          "value": { "type": ["number", "string", "null"] },
+          "condition": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "claims": { "type": "array", "items": { "type": "string" } },
+    "limitations": { "type": "array", "items": { "type": "string" } },
+    "evidence_spans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["field", "quote"],
+        "properties": {
+          "field": { "type": "string" },
+          "quote": { "type": "string" }
+        }
+      }
+    }
+  }
+}

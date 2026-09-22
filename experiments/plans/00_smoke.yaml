@@ -1,0 +1,11 @@
+plan_id: smoke
+description: No GPU. Validates registry, metrics, and skip-on-repeat.
+jobs:
+  - cell: smoke
+    backend: smoke
+    decode_arm: smoke
+    model_id: dummy
+    split: dev
+    domain: A
+    data_rev: example
+    max_docs: 1

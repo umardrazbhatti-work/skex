@@ -1,0 +1,25 @@
+plan_id: sft_3b_domain_a
+description: QLoRA 3B on Domain A, then cells C/D. Requires processed train split.
+jobs:
+  - cell: train
+    decode_arm: prompt_json
+    model_id: meta-llama/Llama-3.2-3B-Instruct
+    split: train
+    domain: A
+    data_rev: v0
+    train_examples: 5000
+    epochs: 2
+  - cell: C
+    decode_arm: prompt_json
+    model_id: meta-llama/Llama-3.2-3B-Instruct
+    adapter_id: domain_a_3b_v0
+    split: test
+    domain: A
+    data_rev: v0
+  - cell: D
+    decode_arm: constrained
+    model_id: meta-llama/Llama-3.2-3B-Instruct
+    adapter_id: domain_a_3b_v0
+    split: test
+    domain: A
+    data_rev: v0

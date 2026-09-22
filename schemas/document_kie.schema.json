@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "skex://schemas/document_kie.schema.json",
+  "title": "SKEX Document KIE wrapper v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["fields", "evidence_spans"],
+  "properties": {
+    "fields": {
+      "type": "object",
+      "additionalProperties": { "type": ["string", "number", "null"] }
+    },
+    "evidence_spans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["field", "quote"],
+        "properties": {
+          "field": { "type": "string" },
+          "quote": { "type": "string" }
+        }
+      }
+    }
+  }
+}

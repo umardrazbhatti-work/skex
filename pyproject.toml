@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "skex"
+version = "0.1.0"
+description = "Structured knowledge extraction — constraint-tax protocol"
+requires-python = ">=3.10"
+dependencies = [
+  "pyyaml>=6.0",
+  "jsonschema>=4.21",
+  "orjson>=3.9",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+train = ["transformers", "peft", "accelerate", "bitsandbytes", "datasets", "trl"]
+
+[project.scripts]
+skex-run = "skex.experiments.runner:main"
+skex-status = "skex.experiments.status:main"
+skex-ablate = "skex.experiments.ablate:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

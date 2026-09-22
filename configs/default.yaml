@@ -1,0 +1,53 @@
+project: skex
+schema_id: research_card.v0.1
+schema_path: schemas/research_card.schema.json
+
+data:
+  domain_a_dir: data/processed/domain_a
+  domain_b_dir: data/processed/domain_b
+  domain_b: cord          # cord | sroie | realkie  — freeze before SFT
+  max_input_tokens: 2048
+  pack_priority: [title, abstract, method, experiments, limitations]
+
+models:
+  probe: meta-llama/Llama-3.2-1B-Instruct
+  primary: meta-llama/Llama-3.2-3B-Instruct
+  ceiling: Qwen/Qwen2.5-7B-Instruct
+  encoder: allenai/scibert_scivocab_uncased
+  generalist_id: gpt-4.1
+  generalist_frozen_on: "YYYY-MM-DD"
+
+decode:
+  engine: outlines          # outlines | xgrammar  — pick one and keep it
+  arms: [prompt_json, constrained]
+  max_new_tokens: 512
+  temperature: 0.0
+
+train:
+  method: qlora
+  bits: 4
+  lora_r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+  epochs: 2
+  lr: 2.0e-4
+  batch_size: 1
+  grad_accum: 8
+  seq_len: 2048
+  save_every_steps: 200
+
+eval:
+  paraphrases: 3
+  score_unattested: false
+  primary_metrics: [field_f1, wrong_valid, span_support]
+
+hardware:
+  assume: kaggle_t4_single
+  max_vram_gb: 16
+
+registry:
+  path: experiments/registry.jsonl
+  failures_path: experiments/failures.jsonl
+  block_failed: true
+  block_succeeded: true

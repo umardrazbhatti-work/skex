@@ -1,0 +1,21 @@
+{
+  "id": "demo-001",
+  "domain": "A",
+  "source": "smoke",
+  "instruction": "Extract a research card. Use empty arrays if unsupported. Quote an evidence span for every non-empty field.",
+  "input": "We propose a BiLSTM-CRF for named entity recognition. We evaluate on CoNLL-2003 and report 91.2 F1 on the test set. English only.",
+  "output": {
+    "task": ["named entity recognition"],
+    "method": ["BiLSTM-CRF"],
+    "datasets": ["CoNLL-2003"],
+    "metrics": ["F1"],
+    "scores": [{"metric": "F1", "value": 91.2, "condition": "test"}],
+    "claims": ["outperforms a linear CRF baseline"],
+    "limitations": ["English only"],
+    "evidence_spans": [
+      {"field": "method", "quote": "We propose a BiLSTM-CRF"},
+      {"field": "datasets", "quote": "We evaluate on CoNLL-2003"},
+      {"field": "scores", "quote": "report 91.2 F1 on the test set"}
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+# Install only on GPU machines / Kaggle.
+# Prefer Unsloth's own install snippet if it conflicts with these pins.
+torch
+transformers
+peft
+accelerate
+bitsandbytes
+datasets
+trl
