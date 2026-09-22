@@ -14,6 +14,6 @@ def classify(exc: BaseException) -> str:
         return "data"
     if "timeout" in msg or "deadline" in msg:
         return "timeout"
-    if "api" in msg or "rate limit" in msg or "openai" in msg or "anthropic" in msg:
+    if "api" in msg or "rate limit" in msg or "401" in msg or "403" in msg or "gated" in msg or "unauthorized" in msg:
         return "api"
     return "unknown"

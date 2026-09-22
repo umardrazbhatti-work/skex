@@ -73,6 +73,12 @@ That commit also contains the SciRIFF converter, the Kaggle notebook, and these 
 - Domain B converter is not written. Freeze stays `cord` in `configs/default.yaml`.
 - SciER and raw SciERC are downloaded only. They are not converted.
 
+## Next: plan 01, untouched models
+
+Wired in code, not run yet. `experiments/plans/01_tax_zeroshot.yaml` is four dev cells: Llama-3.2-1B and 3B, each with prompt-JSON and Outlines. Domain A dev has 50 rows, so each cell scores 50. No QLoRA. No 7B.
+
+The Kaggle notebook's last cell runs that plan. It needs Accelerator **GPU T4 x1** and a secret named `HF_TOKEN`. The Llama 3.2 license must be accepted on Hugging Face. The cell rewrites `/kaggle/working/skex-output.zip`.
+
 ## Kaggle run 22-9-26 14:25
 
 Log and zip: `Results/22-9-26 1425Hrs/`. Verdict: plumbing pass. Not a paper result.

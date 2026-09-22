@@ -25,8 +25,48 @@ def describe_backend() -> dict[str, Any]:
 
 
 def load_causal(model_id: str, *, fourbit: bool = True):
-    """GPU entry point. Implemented when [train] extras are present."""
-    raise NotImplementedError(
-        f"load_causal({model_id!r}) needs the train extra and a GPU. "
-        "Implement in skex.models.load using Unsloth FastLanguageModel when available."
+    """Load one causal LM onto cuda:0. 4-bit so a 3B model fits a 16GB T4.
+
+    Returns (model, tokenizer). Does not download a 7B and does not start QLoRA.
+    """
+    import torch
+    from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+
+    if not torch.cuda.is_available():
+        raise RuntimeError(f"load_causal({model_id!r}) needs one CUDA GPU. Set the Kaggle accelerator to GPU T4 x1.")
+    if torch.cuda.device_count() > 1:
+        print("WARNING: more than one GPU is visible. Weights stay on cuda:0. A 2x T4 session still costs double quota.")
+    quant = None
+    if fourbit:
+        quant = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_compute_dtype=torch.float16,
+            bnb_4bit_use_double_quant=True,
+        )
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
+    if tokenizer.pad_token_id is None:
+        tokenizer.pad_token = tokenizer.eos_token
+    model = AutoModelForCausalLM.from_pretrained(
+        model_id,
+        quantization_config=quant,
+        device_map={"": 0},
+        torch_dtype=torch.float16,
     )
+    model.eval()
+    return model, tokenizer
+
+
+def release_causal(loaded) -> None:
+    """Drop decoder state. The caller must also drop its own reference to `loaded`."""
+    from skex.decode.interface import clear_decoder_cache
+    clear_decoder_cache()
+    del loaded
+    import gc
+    gc.collect()
+    try:
+        import torch
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+    except Exception:
+        pass

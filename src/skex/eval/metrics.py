@@ -60,4 +60,8 @@ def aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "wrong_valid": sum(1 for r in rows if r.get("wrong_valid")) / n,
         "span_support": mean("span_support"),
         "gated_precision": mean("gated_precision"),
+        "latency_ms": mean("latency_ms"),
+        "tokens_in": mean("tokens_in"),
+        "tokens_out": mean("tokens_out"),
+        "cost_usd": mean("cost_usd"),
     }

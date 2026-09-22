@@ -2,6 +2,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 import traceback
 import uuid
 from datetime import datetime, timezone
@@ -54,16 +55,23 @@ def _load_split(job: dict, cfg: dict) -> list[dict]:
     return [json.loads(demo.read_text())]
 
 
-def _predict(job: dict, record: dict, cfg: dict) -> str:
+def _predict(job: dict, record: dict, cfg: dict, schema: dict, loaded) -> str:
+    from skex.decode.interface import generate
+
     arm = job.get("decode_arm", "smoke")
     if arm == "smoke" or job.get("backend") == "smoke":
-        from skex.decode.interface import generate
         return generate(record["input"], arm="smoke", engine="none")
-    from skex.decode.interface import generate
+    model, tokenizer = loaded
     return generate(
         record["input"],
-        arm=job.get("decode_arm", "prompt_json"),
+        arm=arm,
         engine=cfg["decode"]["engine"],
+        schema=schema,
+        instruction=record.get("instruction") or "",
+        model=model,
+        tokenizer=tokenizer,
+        max_new_tokens=int(cfg["decode"]["max_new_tokens"]),
+        max_input_tokens=int(cfg["train"]["seq_len"]) - int(cfg["decode"]["max_new_tokens"]),
     )
 
 
@@ -91,6 +99,7 @@ def run_job(plan: dict, job: dict, cfg: dict, registry: Registry, *, retry_faile
         return result
     registry.start(spec, run_id, fp)
     log.emit("start", backend=describe_backend())
+    loaded = None
     try:
         rows = _load_split(job, cfg)
         limit = job.get("max_docs")
@@ -99,12 +108,28 @@ def run_job(plan: dict, job: dict, cfg: dict, registry: Registry, *, retry_faile
         scored = []
         gens = []
         schema_path = str(resolve(cfg["schema_path"]))
-        for rec in rows:
-            raw = _predict(job, rec, cfg)
+        schema = json.loads(Path(schema_path).read_text(encoding="utf-8"))
+        arm = job.get("decode_arm", "smoke")
+        if arm != "smoke" and job.get("backend") != "smoke":
+            from skex.models.load import load_causal
+            print(f"loading {spec['model_id']} on cuda:0")
+            loaded = load_causal(spec["model_id"], fourbit=True)
+        from skex.decode.interface import generate
+        for index, rec in enumerate(rows, start=1):
+            started = time.perf_counter()
+            raw = _predict(job, rec, cfg, schema, loaded)
+            latency_ms = (time.perf_counter() - started) * 1000.0
             s = score_example(raw, rec["output"], rec["input"], schema_path, cfg["eval"]["score_unattested"])
+            usage = getattr(generate, "last_usage", {})
             s["id"] = rec["id"]
+            s["latency_ms"] = latency_ms
+            s["tokens_in"] = usage.get("tokens_in", 0)
+            s["tokens_out"] = usage.get("tokens_out", 0)
+            s["cost_usd"] = usage.get("cost_usd", 0.0)
             scored.append(s)
             gens.append({"id": rec["id"], "raw": raw, "scores": s})
+            if index == 1 or index % 10 == 0 or index == len(rows):
+                print(f"doc {index}/{len(rows)} id={rec['id']} f1={s['field_f1']:.3f} valid={s['schema_valid']}")
         metrics = aggregate(scored)
         log.write_json("metrics.json", metrics)
         log.write_json("generations.json", gens)
@@ -124,6 +149,10 @@ def run_job(plan: dict, job: dict, cfg: dict, registry: Registry, *, retry_faile
         log.emit("fail", failure_class=klass, error=str(e))
         result["status"] = "failed"
         print(f"FAIL {fp} class={klass} {e}")
+    finally:
+        from skex.models.load import release_causal
+        release_causal(loaded)
+        loaded = None
     return result
 
 
