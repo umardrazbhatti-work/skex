@@ -48,9 +48,19 @@ This Windows install blocks PyArrow's parquet DLL (Application Control). The con
 
 Details and the "do not relabel the raw files" decision: `docs/DATASET_INSPECTION.md`.
 
+## Git
+
+Pushed to https://github.com/umardrazbhatti-work/skex on `main`.
+
+Commit: `13ddd7da323ced622db2f3307d8a669e2130d1ab`
+
+Message: `Initial SKEX workspace: plans, registry, Kaggle notebook.`
+
+That commit also contains the SciRIFF converter, the Kaggle notebook, and these notes. There is no second commit. Unstaging the converter before the first commit failed because the repository had no HEAD yet, and the push had already happened before a split was possible. Do not force-push to rewrite it.
+
 ## Not done — next session
 
-- Push if the GitHub credentials were not available in this session. Remote: `https://github.com/umardrazbhatti-work/skex.git`. Branch `main` only. No force-push.
+- Do not force-push. Remote is `https://github.com/umardrazbhatti-work/skex.git`, branch `main`.
 - CORD text is downloaded. Do not re-download it. The Domain-B converter is still unwritten.
 - Do not install Unsloth. Do not download a 7B. Do not run `experiments/plans/01_tax_zeroshot.yaml` until you mean to spend T4 quota. Zero-shot cells are defined in that plan. Domain-A JSONL now exists, so the data gate for that plan is met, but it was not run.
 - QLoRA plan `02` stays blocked until those zero-shot cells have been run.
