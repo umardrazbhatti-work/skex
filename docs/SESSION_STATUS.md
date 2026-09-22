@@ -73,6 +73,10 @@ That commit also contains the SciRIFF converter, the Kaggle notebook, and these 
 - Domain B converter is not written. Freeze stays `cord` in `configs/default.yaml`.
 - SciER and raw SciERC are downloaded only. They are not converted.
 
+## Kaggle run 22-9-26 14:30
+
+Log: `Results/22-9-26 1430Hrs/`. Smoke passed again. Plan 01 did not start. The session had no GPU (`nvidia-smi` missing). The cell stopped with `Plan 01 needs one T4`. That is a session setting, not a model bug. Next run must use Accelerator GPU T4 x1. Notebook metadata now requests `nvidiaTeslaT4`.
+
 ## Next: plan 01, untouched models
 
 Wired in code, not run yet. `experiments/plans/01_tax_zeroshot.yaml` is four dev cells: Llama-3.2-1B and 3B, each with prompt-JSON and Outlines. Domain A dev has 50 rows, so each cell scores 50. No QLoRA. No 7B.
