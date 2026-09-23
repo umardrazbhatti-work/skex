@@ -46,7 +46,14 @@ def load_causal(model_id: str, *, fourbit: bool = True):
             bnb_4bit_compute_dtype=torch.float16,
             bnb_4bit_use_double_quant=True,
         )
-    tokenizer = AutoTokenizer.from_pretrained(model_id)
+    token = os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN") or None
+    if model_id.startswith("meta-llama/") and not token:
+        raise RuntimeError(
+            "Llama 3.2 is gated. Add a read token from the Hugging Face account "
+            "that accepted the license as a Kaggle secret named HF_TOKEN."
+        )
+    auth = {"token": token} if token else {}
+    tokenizer = AutoTokenizer.from_pretrained(model_id, **auth)
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token = tokenizer.eos_token
     model = AutoModelForCausalLM.from_pretrained(
@@ -54,6 +61,7 @@ def load_causal(model_id: str, *, fourbit: bool = True):
         quantization_config=quant,
         device_map={"": 0},
         torch_dtype=torch.float16,
+        **auth,
     )
     model.eval()
     return model, tokenizer

@@ -119,6 +119,27 @@ def test_dev_cells_are_sealed_and_test_cells_are_new(tmp_path):
     for fp in test_fps:
         ok, _reason = reg.should_run(fp, retry_failed=True)
         assert ok is True
+    llama_dev = load_plan("experiments/plans/01c_tax_zeroshot_llama_dev.yaml")
+    llama_test = load_plan("experiments/plans/01d_tax_zeroshot_llama_test.yaml")
+    llama_dev_fps = [fingerprint(_spec_from_job(llama_dev, job, cfg)) for job in llama_dev["jobs"]]
+    llama_test_fps = [fingerprint(_spec_from_job(llama_test, job, cfg)) for job in llama_test["jobs"]]
+    assert [job["model_id"] for job in llama_dev["jobs"]] == [
+        "meta-llama/Llama-3.2-1B-Instruct",
+        "meta-llama/Llama-3.2-1B-Instruct",
+        "meta-llama/Llama-3.2-3B-Instruct",
+        "meta-llama/Llama-3.2-3B-Instruct",
+    ]
+    assert [job["split"] for job in llama_dev["jobs"]] == ["dev", "dev", "dev", "dev"]
+    assert [job["split"] for job in llama_test["jobs"]] == ["test", "test", "test", "test"]
+    assert len(set(llama_dev_fps)) == 4
+    assert len(set(llama_test_fps)) == 4
+    known = set(dev_fps) | set(test_fps)
+    assert known.isdisjoint(llama_dev_fps)
+    assert known.isdisjoint(llama_test_fps)
+    assert set(llama_dev_fps).isdisjoint(llama_test_fps)
+    for fp in llama_dev_fps + llama_test_fps:
+        ok, _reason = reg.should_run(fp, retry_failed=True)
+        assert ok is True
 
 
 def test_block_success(tmp_path):

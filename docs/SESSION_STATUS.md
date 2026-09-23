@@ -4,7 +4,7 @@ Read this file first at the next session, then `GROK.md`, `docs/LOCKED_DECISIONS
 
 ## Resume here — saved 2026-09-23 after `Results/23-9-26 1515Hrs`
 
-Plan 01 dev is finished and sealed. The next Kaggle run is the test split, plan `experiments/plans/01b_tax_zeroshot_test.yaml`. Do not start plan 02. Do not install Unsloth. Do not download a 7B. Do not re-run the four dev fingerprints.
+Qwen dev is finished and sealed. Llama is included, not skipped. The Hugging Face account in the 23 Sep screenshot has accepted Meta's Llama 3.2 license. The next Kaggle run needs a read token from that account stored as a Kaggle secret named `HF_TOKEN`. Do not start plan 02. Do not install Unsloth. Do not download a 7B. Do not re-run the four Qwen dev fingerprints.
 
 Saved dev numbers, 50 papers each. Outlines rows are the 22 Sep runs. Prompt-JSON rows are this folder.
 
@@ -19,7 +19,7 @@ Run ids for the new cells: `20260923T081503Z-80feff` (1.5B) and `20260923T082300
 
 Fence, kept separate from the table above. All 50 of the 1.5B prompt completions start with a markdown ` ```json ` fence, so the saved parse rate is 0.00 and field F1 was not scored. That 0.00 stays the saved metric. The 3B prompt completions are raw JSON. A one-off count of the card inside the 1.5B fence, which does not replace the table, was parse 0.94, schema valid 0.72, field F1 0.140, wrong-valid 0.72, span support 0. Three texts still failed to parse after the fence was removed. Eight parsed cards had `scores` as an object, and three had a list where the schema wants a number or string.
 
-Next run: re-upload `notebooks/skex_kaggle.ipynb`, Accelerator GPU T4 x2, Internet on, dataset `skex-datasets`. The last cell skips the sealed dev plan, then scores all 99 test papers. Budget about 70–90 minutes. Doc lines print every 10 papers. Download `skex-output.zip` into a new Results folder. Plan 02 now names `Qwen/Qwen2.5-3B-Instruct` and 344 train rows, and the notebook does not run it. `train_qlora` is still unimplemented.
+Next run, after the token is saved on Kaggle: re-upload `notebooks/skex_kaggle.ipynb`. Accelerator GPU T4 x2, Internet on, dataset `skex-datasets`. The last cell skips sealed Qwen dev, scores the 99 Qwen test papers, then runs Llama 3.2 1B and 3B on dev (50) and test (99), prompt-JSON then Outlines. Budget about 3–4 hours. Doc lines print every 10 papers. The zip is rewritten during the run. Download it into a new Results folder. Plan 02 is still Qwen-only and the notebook does not run it. `train_qlora` is still unimplemented.
 
 ## Previous resume — 2026-09-23 after `Results/23-9-26 1030Hrs`
 

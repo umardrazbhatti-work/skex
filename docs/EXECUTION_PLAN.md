@@ -15,10 +15,13 @@ Agent: finish the current phase before starting the next. Update `experiments/re
 - [ ] Print split counts; stop if test ids leak into train
 
 ## Phase 2 — zero-shot tax (GPU)
-Dev plan: `experiments/plans/01_tax_zeroshot.yaml` (finished, sealed).
-Test plan: `experiments/plans/01b_tax_zeroshot_test.yaml` (next Kaggle run).
+Qwen dev: `experiments/plans/01_tax_zeroshot.yaml` (finished, sealed).
+Qwen test: `experiments/plans/01b_tax_zeroshot_test.yaml`.
+Llama dev: `experiments/plans/01c_tax_zeroshot_llama_dev.yaml`.
+Llama test: `experiments/plans/01d_tax_zeroshot_llama_test.yaml`.
 - [x] Cells A/B on Qwen2.5 1.5B and 3B, dev first (50 docs). Results: `23-9-26 1515Hrs`.
-- [ ] Same four cells on the 99 test papers
+- [ ] Same four Qwen cells on the 99 test papers
+- [ ] Llama 3.2 1B and 3B, prompt-JSON and Outlines, dev then test. License accepted 22 Sep 2026. Needs Kaggle secret `HF_TOKEN`.
 - [x] Dev `metrics.json` has validity, field F1, wrong-valid, span-support
 
 ## Phase 3 — QLoRA 3B Domain A
