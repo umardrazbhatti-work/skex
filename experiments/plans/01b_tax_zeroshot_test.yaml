@@ -1,0 +1,34 @@
+plan_id: tax_zeroshot_test
+description: >
+  Same four cells as plan 01, on the 99 Domain-A test papers.
+  Dev fingerprints are sealed. Do not start QLoRA in this run.
+  Qwen2.5 1.5B and 3B are public. No HF token.
+jobs:
+  - cell: A
+    decode_arm: prompt_json
+    model_id: Qwen/Qwen2.5-1.5B-Instruct
+    split: test
+    domain: A
+    data_rev: v0
+    max_docs: 99
+  - cell: B
+    decode_arm: constrained
+    model_id: Qwen/Qwen2.5-1.5B-Instruct
+    split: test
+    domain: A
+    data_rev: v0
+    max_docs: 99
+  - cell: A
+    decode_arm: prompt_json
+    model_id: Qwen/Qwen2.5-3B-Instruct
+    split: test
+    domain: A
+    data_rev: v0
+    max_docs: 99
+  - cell: B
+    decode_arm: constrained
+    model_id: Qwen/Qwen2.5-3B-Instruct
+    split: test
+    domain: A
+    data_rev: v0
+    max_docs: 99

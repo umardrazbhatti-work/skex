@@ -82,24 +82,41 @@ def test_pack_kaggle_writes_the_zip(tmp_path):
         assert "outputs/runs/r1/metrics.json" in archive.namelist()
 
 
-def test_sealed_outlines_cells_import_as_succeeded(tmp_path):
-    """Outlines dev cells from 22 Sep travel in the repo. Prompt-JSON does not.
+def test_dev_cells_are_sealed_and_test_cells_are_new(tmp_path):
+    """The four dev cells travel in sealed.jsonl. The test split is a new fingerprint.
 
-    registry.jsonl is gitignored, so a Kaggle clone only learns about
-    finished cells through experiments/sealed.jsonl. The 23 Sep prompt-JSON
-    1.5B cell finished in the log and then the kernel was killed before its
-    generations were zipped, so those two fingerprints must still run.
+    registry.jsonl is gitignored, so a Kaggle clone only skips cells that
+    are listed in experiments/sealed.jsonl.
     """
+    from skex.config import load_config
+    from skex.experiments.fingerprint import fingerprint
+    from skex.experiments.plan import load_plan
+    from skex.experiments.runner import _spec_from_job
     from skex.paths import ROOT
 
+    cfg = load_config()
+    dev = load_plan("experiments/plans/01_tax_zeroshot.yaml")
+    test = load_plan("experiments/plans/01b_tax_zeroshot_test.yaml")
+    dev_fps = [fingerprint(_spec_from_job(dev, job, cfg)) for job in dev["jobs"]]
+    test_fps = [fingerprint(_spec_from_job(test, job, cfg)) for job in test["jobs"]]
+    assert dev_fps == [
+        "998f8fafc5edf958",
+        "5ea1cba6acc2e8a2",
+        "cb0d9b71c2836671",
+        "85edb1fb3d92e4c8",
+    ]
+    assert [job["split"] for job in test["jobs"]] == ["test", "test", "test", "test"]
+    assert [job["max_docs"] for job in test["jobs"]] == [99, 99, 99, 99]
+    assert len(set(test_fps)) == 4
+    assert set(dev_fps).isdisjoint(test_fps)
     reg = Registry(tmp_path / "reg.jsonl", tmp_path / "fail.jsonl")
     sealed = ROOT / "experiments" / "sealed.jsonl"
-    assert reg.import_sealed(sealed) == 2
+    assert reg.import_sealed(sealed) == 4
     assert reg.import_sealed(sealed) == 0
-    for fp in ("5ea1cba6acc2e8a2", "85edb1fb3d92e4c8"):
+    for fp in dev_fps:
         ok, reason = reg.should_run(fp, retry_failed=True)
         assert ok is False and "succeeded" in reason
-    for fp in ("998f8fafc5edf958", "cb0d9b71c2836671"):
+    for fp in test_fps:
         ok, _reason = reg.should_run(fp, retry_failed=True)
         assert ok is True
 

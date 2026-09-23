@@ -15,10 +15,11 @@ Agent: finish the current phase before starting the next. Update `experiments/re
 - [ ] Print split counts; stop if test ids leak into train
 
 ## Phase 2 — zero-shot tax (GPU)
-Plan: `experiments/plans/01_tax_zeroshot.yaml`
-- [ ] Cells A/B on 1B and 3B, **dev** first (≤150 docs)
-- [ ] Then test if quota remains
-- [ ] Produce `outputs/runs/*/metrics.json` with validity, field F1, wrong-valid, span-support
+Dev plan: `experiments/plans/01_tax_zeroshot.yaml` (finished, sealed).
+Test plan: `experiments/plans/01b_tax_zeroshot_test.yaml` (next Kaggle run).
+- [x] Cells A/B on Qwen2.5 1.5B and 3B, dev first (50 docs). Results: `23-9-26 1515Hrs`.
+- [ ] Same four cells on the 99 test papers
+- [x] Dev `metrics.json` has validity, field F1, wrong-valid, span-support
 
 ## Phase 3 — QLoRA 3B Domain A
 Plan: `experiments/plans/02_sft_3b_domain_a.yaml`

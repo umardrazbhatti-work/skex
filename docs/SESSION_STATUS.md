@@ -2,9 +2,28 @@
 
 Read this file first at the next session, then `GROK.md`, `docs/LOCKED_DECISIONS.md`, `docs/EXECUTION_PLAN.md`, and `docs/DATASET_INSPECTION.md`.
 
-## Resume here — saved 2026-09-23 after `Results/23-9-26 1030Hrs`
+## Resume here — saved 2026-09-23 after `Results/23-9-26 1515Hrs`
 
-Both prompt-JSON cells did **not** succeed. Do not start plan 02. Do not install Unsloth. Do not download a 7B.
+Plan 01 dev is finished and sealed. The next Kaggle run is the test split, plan `experiments/plans/01b_tax_zeroshot_test.yaml`. Do not start plan 02. Do not install Unsloth. Do not download a 7B. Do not re-run the four dev fingerprints.
+
+Saved dev numbers, 50 papers each. Outlines rows are the 22 Sep runs. Prompt-JSON rows are this folder.
+
+| Fingerprint | Arm | Model | Parse | Schema valid | Field F1 | Wrong-valid | Span support |
+|---|---|---|---:|---:|---:|---:|---:|
+| `998f8fafc5edf958` | prompt-JSON | Qwen2.5 1.5B | 0.00 | 0.00 | 0.000 | 0.00 | 0.000 |
+| `5ea1cba6acc2e8a2` | Outlines | Qwen2.5 1.5B | 1.00 | 1.00 | 0.118 | 1.00 | 0.004 |
+| `cb0d9b71c2836671` | prompt-JSON | Qwen2.5 3B | 1.00 | 1.00 | 0.154 | 1.00 | 0.035 |
+| `85edb1fb3d92e4c8` | Outlines | Qwen2.5 3B | 1.00 | 1.00 | 0.211 | 1.00 | 0.000 |
+
+Run ids for the new cells: `20260923T081503Z-80feff` (1.5B) and `20260923T082300Z-4d7647` (3B). Generations are in the zip. All four dev fingerprints are in `experiments/sealed.jsonl`.
+
+Fence, kept separate from the table above. All 50 of the 1.5B prompt completions start with a markdown ` ```json ` fence, so the saved parse rate is 0.00 and field F1 was not scored. That 0.00 stays the saved metric. The 3B prompt completions are raw JSON. A one-off count of the card inside the 1.5B fence, which does not replace the table, was parse 0.94, schema valid 0.72, field F1 0.140, wrong-valid 0.72, span support 0. Three texts still failed to parse after the fence was removed. Eight parsed cards had `scores` as an object, and three had a list where the schema wants a number or string.
+
+Next run: re-upload `notebooks/skex_kaggle.ipynb`, Accelerator GPU T4 x2, Internet on, dataset `skex-datasets`. The last cell skips the sealed dev plan, then scores all 99 test papers. Budget about 70–90 minutes. Doc lines print every 10 papers. Download `skex-output.zip` into a new Results folder. Plan 02 now names `Qwen/Qwen2.5-3B-Instruct` and 344 train rows, and the notebook does not run it. `train_qlora` is still unimplemented.
+
+## Previous resume — 2026-09-23 after `Results/23-9-26 1030Hrs`
+
+Both prompt-JSON cells were still open when that note was written. The 1515 run above closed them.
 
 `23-9-26 1030Hrs` is Kaggle version 8, GPU T4 x2, killed after 43213s (12h limit, exit 137). `RUN.txt` says `smoke finished` because the zip was written before plan 01. Pytest 16 passed. Smoke skipped on the second call.
 
