@@ -13,11 +13,12 @@ from skex.data.io import load_jsonl
 from skex.eval.classify import classify
 from skex.eval.metrics import aggregate, score_example
 from skex.experiments.fingerprint import fingerprint
+from skex.experiments.pack import pack_kaggle
 from skex.experiments.plan import load_plan
 from skex.experiments.registry import Registry
 from skex.logging.events import EventLogger
-from skex.models.load import describe_backend
-from skex.paths import ROOT, resolve
+from skex.models.load import ModelSlot, describe_backend
+from skex.paths import resolve
 
 
 def _run_id() -> str:
@@ -75,7 +76,22 @@ def _predict(job: dict, record: dict, cfg: dict, schema: dict, loaded) -> str:
     )
 
 
-def run_job(plan: dict, job: dict, cfg: dict, registry: Registry, *, retry_failed: bool, force: bool) -> dict:
+def _checkpoint(log: EventLogger, gens: list, scored: list, fp: str, index: int, total: int) -> None:
+    log.write_json("generations.json", gens)
+    log.write_json("metrics.json", aggregate(scored))
+    pack_kaggle(f"partial {fp} {index}/{total}")
+
+
+def run_job(
+    plan: dict,
+    job: dict,
+    cfg: dict,
+    registry: Registry,
+    *,
+    retry_failed: bool,
+    force: bool,
+    slot: ModelSlot | None = None,
+) -> dict:
     spec = _spec_from_job(plan, job, cfg)
     fp = fingerprint(spec)
     ok, reason = registry.should_run(fp, retry_failed=retry_failed)
@@ -95,10 +111,13 @@ def run_job(plan: dict, job: dict, cfg: dict, registry: Registry, *, retry_faile
     if not ok:
         result["status"] = "skipped"
         log.emit("skipped", reason=reason)
-        print(f"SKIP {fp} {reason}")
+        print(f"SKIP {fp} {reason}", flush=True)
         return result
     registry.start(spec, run_id, fp)
     log.emit("start", backend=describe_backend())
+    owns_slot = slot is None
+    if owns_slot:
+        slot = ModelSlot()
     loaded = None
     try:
         rows = _load_split(job, cfg)
@@ -112,8 +131,8 @@ def run_job(plan: dict, job: dict, cfg: dict, registry: Registry, *, retry_faile
         arm = job.get("decode_arm", "smoke")
         if arm != "smoke" and job.get("backend") != "smoke":
             from skex.models.load import load_causal
-            print(f"loading {spec['model_id']} on cuda:0")
-            loaded = load_causal(spec["model_id"], fourbit=True)
+            loaded, how = slot.get(spec["model_id"], lambda mid: load_causal(mid, fourbit=True))
+            print(f"{how} {spec['model_id']} on cuda:0", flush=True)
         from skex.decode.interface import generate
         for index, rec in enumerate(rows, start=1):
             started = time.perf_counter()
@@ -128,8 +147,16 @@ def run_job(plan: dict, job: dict, cfg: dict, registry: Registry, *, retry_faile
             s["cost_usd"] = usage.get("cost_usd", 0.0)
             scored.append(s)
             gens.append({"id": rec["id"], "raw": raw, "scores": s})
+            if index == 1:
+                preview = " ".join(str(raw).split())[:200]
+                print(f"preview {preview}", flush=True)
             if index == 1 or index % 10 == 0 or index == len(rows):
-                print(f"doc {index}/{len(rows)} id={rec['id']} f1={s['field_f1']:.3f} valid={s['schema_valid']}")
+                print(
+                    f"doc {index}/{len(rows)} id={rec['id']} f1={s['field_f1']:.3f} "
+                    f"parse={s['parse_ok']} valid={s['schema_valid']}",
+                    flush=True,
+                )
+                _checkpoint(log, gens, scored, fp, index, len(rows))
         metrics = aggregate(scored)
         log.write_json("metrics.json", metrics)
         log.write_json("generations.json", gens)
@@ -137,22 +164,25 @@ def run_job(plan: dict, job: dict, cfg: dict, registry: Registry, *, retry_faile
         log.emit("finish", metrics=metrics)
         result["status"] = "succeeded"
         result["metrics"] = metrics
-        print(f"OK   {fp} run={run_id} n={metrics['n']} f1={metrics['field_f1']:.3f} wrong_valid={metrics['wrong_valid']:.3f}")
+        print(
+            f"OK   {fp} run={run_id} n={metrics['n']} f1={metrics['field_f1']:.3f} "
+            f"wrong_valid={metrics['wrong_valid']:.3f}",
+            flush=True,
+        )
     except NotImplementedError as e:
         registry.fail(run_id, fp, spec, failure_class="unknown", error=str(e))
         log.emit("fail", failure_class="unknown", error=str(e))
         result["status"] = "failed"
-        print(f"FAIL {fp} not-implemented: {e}")
+        print(f"FAIL {fp} not-implemented: {e}", flush=True)
     except Exception as e:
         klass = classify(e)
         registry.fail(run_id, fp, spec, failure_class=klass, error=traceback.format_exc())
         log.emit("fail", failure_class=klass, error=str(e))
         result["status"] = "failed"
-        print(f"FAIL {fp} class={klass} {e}")
+        print(f"FAIL {fp} class={klass} {e}", flush=True)
     finally:
-        from skex.models.load import release_causal
-        release_causal(loaded)
-        loaded = None
+        if owns_slot:
+            slot.release()
     return result
 
 
@@ -166,12 +196,24 @@ def main(argv: list[str] | None = None) -> int:
     cfg = load_config(args.config)
     plan = load_plan(args.plan)
     registry = Registry(cfg["registry"]["path"], cfg["registry"]["failures_path"])
-    print(f"plan={plan['plan_id']} jobs={len(plan['jobs'])}")
+    sealed = resolve("experiments/sealed.jsonl")
+    imported = registry.import_sealed(sealed)
+    if imported:
+        print(f"imported {imported} sealed rows from {sealed}", flush=True)
+    print(f"plan={plan['plan_id']} jobs={len(plan['jobs'])}", flush=True)
     rc = 0
-    for job in plan["jobs"]:
-        res = run_job(plan, job, cfg, registry, retry_failed=args.retry_failed, force=args.force)
-        if res["status"] == "failed":
-            rc = 1
+    slot = ModelSlot()
+    try:
+        for job in plan["jobs"]:
+            res = run_job(
+                plan, job, cfg, registry,
+                retry_failed=args.retry_failed, force=args.force, slot=slot,
+            )
+            if res["status"] == "failed":
+                rc = 1
+            pack_kaggle(f"plan {plan['plan_id']} last={res['fingerprint']} status={res['status']}")
+    finally:
+        slot.release()
     return rc
 
 

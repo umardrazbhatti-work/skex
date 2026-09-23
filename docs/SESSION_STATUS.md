@@ -2,32 +2,47 @@
 
 Read this file first at the next session, then `GROK.md`, `docs/LOCKED_DECISIONS.md`, `docs/EXECUTION_PLAN.md`, and `docs/DATASET_INSPECTION.md`.
 
-## Resume here — saved 2026-09-22 15:36 local
+## Resume here — saved 2026-09-23 after `Results/23-9-26 1030Hrs`
 
-Git `main` is `42fd4fc` and that commit is on GitHub. A Kaggle run was still in progress when this note was written. It has no Results folder yet. Do not invent its outcome.
+Both prompt-JSON cells did **not** succeed. Do not start plan 02. Do not install Unsloth. Do not download a 7B.
 
-When the user returns, look in `C:\Users\PC1\Desktop\Specialization Beats Scale G\Results` for a subfolder newer than `22-9-26 1515Hrs`. Read that folder before editing code. The run they left running is the retry of plan 01 after the prompt-JSON tensor fix.
+`23-9-26 1030Hrs` is Kaggle version 8, GPU T4 x2, killed after 43213s (12h limit, exit 137). `RUN.txt` says `smoke finished` because the zip was written before plan 01. Pytest 16 passed. Smoke skipped on the second call.
 
-What that run is supposed to do:
+| Fingerprint | Cell | Model | This run | Note |
+|---|---|---|---|---|
+| `998f8fafc5edf958` | A prompt-JSON | Qwen2.5 1.5B | process finished | `run=20260922T102328Z-d766b0`, n=50, field F1 0.000, wrong-valid 0.000. Logged docs 1/10/20/30/40/50 were all `valid=False`. Generations were not in the zip. Not sealed in `experiments/registry.jsonl`, so the next run repeats it and keeps the raw text. |
+| `5ea1cba6acc2e8a2` | B constrained | Qwen2.5 1.5B | did not finish | Started a second 4-bit load of the same 1.5B and sat at `Loading weights: 49%` until the kill. Already succeeded on 22 Sep. Now sealed in the registry. Must stay skipped. |
+| `cb0d9b71c2836671` | A prompt-JSON | Qwen2.5 3B | did not start | Still the open cell. |
+| `85edb1fb3d92e4c8` | B constrained | Qwen2.5 3B | did not start | Already succeeded on 22 Sep. Now sealed. Must stay skipped. |
 
-- Accelerator is GPU T4 x2. Use GPU 0 only. Do not ask them to switch to T4 x1.
-- Models are public Qwen, not Llama: `Qwen/Qwen2.5-1.5B-Instruct` and `Qwen/Qwen2.5-3B-Instruct`. No `HF_TOKEN` is required for this run.
-- Four cells, 50 Domain-A dev papers each. Prompt-JSON versus Outlines. No QLoRA. No 7B.
-- Notebook: `notebooks/skex_kaggle.ipynb`. Dataset mount: `/kaggle/input/datasets/umardrazbhatti/skex-datasets`.
-- The notebook passes `--retry-failed`. On a fresh Kaggle disk the registry is empty, so all four cells may run again. On a kept disk, the two Outlines cells below must stay skipped.
+Outlines numbers from `Results/22-9-26 1515Hrs` still stand. They are not the prompt-JSON arm. The 1.5B prompt-JSON log line is not a saved paper result: there is no `generations.json` and no `metrics.json` for `20260922T102328Z-d766b0`. Do not fill the missing parse rate, span-support, or token counts.
+
+What changed after reading that folder:
+
+- The runner keeps one loaded model. A second cell with the same `model_id` reuses it instead of calling `from_pretrained` again.
+- Releasing a model drops the reference before `gc` and `empty_cache`. That is the 49% hang.
+- On Kaggle the runner rewrites `/kaggle/working/skex-output.zip` every 10 documents and after every job.
+- Doc 1 prints a 200-character preview plus `parse=` and `valid=`.
+- `experiments/sealed.jsonl` is tracked and holds the two Outlines successes above. `experiments/registry.jsonl` is gitignored, so the runner copies those rows in at the start of every plan. The two prompt-JSON fingerprints are absent, so `--retry-failed` runs them.
+
+Kaggle clones GitHub. These edits do nothing on the next Save & Run until they are pushed and the notebook is re-uploaded. Re-upload `notebooks/skex_kaggle.ipynb` as well. The notebook text no longer says the run will download Llama.
+
+Accelerator stays GPU T4 x2. Use GPU 0 only. Models stay public Qwen. No `HF_TOKEN`.
+
+## Previous resume — 2026-09-22 15:36 local
+
+Git `main` was `42fd4fc`. The run then in progress became `Results/23-9-26 1030Hrs`, read above.
 
 Already finished, from `Results/22-9-26 1515Hrs`. Do not quote these as the prompt-JSON arm:
 
 | Fingerprint | Cell | Model | Status | Note |
 |---|---|---|---|---|
-| `5ea1cba6acc2e8a2` | B constrained | Qwen2.5 1.5B | succeeded | 50 docs, field F1 0.118, wrong-valid 1.0 |
-| `85edb1fb3d92e4c8` | B constrained | Qwen2.5 3B | succeeded | 50 docs, field F1 0.211, wrong-valid 1.0 |
-| `998f8fafc5edf958` | A prompt-JSON | Qwen2.5 1.5B | failed | token-dict crash, fixed in `42fd4fc` |
-| `cb0d9b71c2836671` | A prompt-JSON | Qwen2.5 3B | failed | same crash |
+| `5ea1cba6acc2e8a2` | B constrained | Qwen2.5 1.5B | succeeded | 50 docs, field F1 0.118, wrong-valid 1.0, span-support 0.004 |
+| `85edb1fb3d92e4c8` | B constrained | Qwen2.5 3B | succeeded | 50 docs, field F1 0.211, wrong-valid 1.0, span-support 0.0 |
+| `998f8fafc5edf958` | A prompt-JSON | Qwen2.5 1.5B | failed on 22 Sep, ran on 23 Sep | 22 Sep was the token-dict crash. 23 Sep finished with field F1 0.000 and the artifacts were lost. |
+| `cb0d9b71c2836671` | A prompt-JSON | Qwen2.5 3B | failed on 22 Sep, not rerun | same 22 Sep crash. Still open. |
 
-The 15:15 crash was `AttributeError: shape` in `src/skex/decode/interface.py`. `apply_chat_template` returned a token dict and `model.generate` treated it as a tensor. `chat_tensors()` now unpacks `input_ids`. Tests at save time: 16 passed.
-
-Next session, after the new Results folder is present: read the log and `skex-output/RUN.txt`, say whether both prompt-JSON cells succeeded, and only then compare them with the Outlines numbers above. Do not start plan 02. Do not install Unsloth. Do not download a 7B.
+The 15:15 crash was `AttributeError: shape` in `src/skex/decode/interface.py`. `apply_chat_template` returned a token dict and `model.generate` treated it as a tensor. `chat_tensors()` unpacks `input_ids`. That crash did not recur on 23 Sep.
 
 ## Results folder (fixed)
 

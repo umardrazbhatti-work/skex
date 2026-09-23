@@ -154,3 +154,30 @@ class Registry:
 
     def rows(self) -> Iterator[dict[str, Any]]:
         yield from self._read()
+
+    def import_sealed(self, path: str | Path) -> int:
+        """Append succeeded rows that this registry does not already have.
+
+        experiments/registry.jsonl is gitignored, so a fresh Kaggle clone
+        would otherwise repeat cells that already finished.
+        """
+        path = Path(path)
+        if not path.is_file():
+            return 0
+        existing = self.latest_by_fp()
+        added = 0
+        for line in path.read_bytes().splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            row = orjson.loads(line)
+            fp = row.get("fingerprint")
+            if not fp or row.get("status") != "succeeded":
+                continue
+            prev = existing.get(fp)
+            if prev and prev.get("status") in TERMINAL:
+                continue
+            self.append(row)
+            existing[fp] = row
+            added += 1
+        return added

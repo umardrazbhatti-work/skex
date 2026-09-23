@@ -36,6 +36,57 @@ def test_block_failed(tmp_path):
     assert reg.should_run(fingerprint(spec2))[0] is True
 
 
+def test_slot_reuses_the_same_model_and_releases_on_change():
+    from skex.models.load import ModelSlot
+
+    calls = []
+    released = []
+
+    def loader(model_id):
+        calls.append(model_id)
+        return ("weights", model_id)
+
+    slot = ModelSlot(releaser=released.append)
+    first, how = slot.get("Qwen/Qwen2.5-1.5B-Instruct", loader)
+    again, how2 = slot.get("Qwen/Qwen2.5-1.5B-Instruct", loader)
+    other, how3 = slot.get("Qwen/Qwen2.5-3B-Instruct", loader)
+    assert first is again
+    assert how == "load" and how2 == "reuse" and how3 == "load"
+    assert calls == ["Qwen/Qwen2.5-1.5B-Instruct", "Qwen/Qwen2.5-3B-Instruct"]
+    assert released == [("weights", "Qwen/Qwen2.5-1.5B-Instruct")]
+    slot.release()
+    assert released[-1] == ("weights", "Qwen/Qwen2.5-3B-Instruct")
+    slot.release()
+    assert len(released) == 2
+
+
+def test_pack_kaggle_skips_when_not_on_kaggle():
+    from skex.experiments.pack import pack_kaggle
+    assert pack_kaggle("note") is None
+
+
+def test_sealed_outlines_cells_import_as_succeeded(tmp_path):
+    """Outlines dev cells from 22 Sep travel in the repo. Prompt-JSON does not.
+
+    registry.jsonl is gitignored, so a Kaggle clone only learns about
+    finished cells through experiments/sealed.jsonl. The 23 Sep prompt-JSON
+    1.5B cell finished in the log and then the kernel was killed before its
+    generations were zipped, so those two fingerprints must still run.
+    """
+    from skex.paths import ROOT
+
+    reg = Registry(tmp_path / "reg.jsonl", tmp_path / "fail.jsonl")
+    sealed = ROOT / "experiments" / "sealed.jsonl"
+    assert reg.import_sealed(sealed) == 2
+    assert reg.import_sealed(sealed) == 0
+    for fp in ("5ea1cba6acc2e8a2", "85edb1fb3d92e4c8"):
+        ok, reason = reg.should_run(fp, retry_failed=True)
+        assert ok is False and "succeeded" in reason
+    for fp in ("998f8fafc5edf958", "cb0d9b71c2836671"):
+        ok, _reason = reg.should_run(fp, retry_failed=True)
+        assert ok is True
+
+
 def test_block_success(tmp_path):
     reg = Registry(tmp_path / "reg.jsonl")
     spec = _spec(cell="C")
