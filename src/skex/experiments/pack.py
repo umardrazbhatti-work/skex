@@ -12,8 +12,8 @@ from pathlib import Path
 from skex.paths import ROOT
 
 
-def pack_kaggle(note: str, repo: Path | None = None) -> Path | None:
-    working = Path("/kaggle/working")
+def pack_kaggle(note: str, repo: Path | None = None, working: Path | None = None) -> Path | None:
+    working = Path(working) if working is not None else Path("/kaggle/working")
     if not working.is_dir():
         return None
     repo = Path(repo) if repo is not None else ROOT

@@ -60,9 +60,26 @@ def test_slot_reuses_the_same_model_and_releases_on_change():
     assert len(released) == 2
 
 
-def test_pack_kaggle_skips_when_not_on_kaggle():
+def test_pack_kaggle_skips_when_working_dir_is_missing(tmp_path):
     from skex.experiments.pack import pack_kaggle
-    assert pack_kaggle("note") is None
+    assert pack_kaggle("note", working=tmp_path / "absent") is None
+
+
+def test_pack_kaggle_writes_the_zip(tmp_path):
+    from skex.experiments.pack import pack_kaggle
+    import zipfile
+
+    working = tmp_path / "working"
+    repo = tmp_path / "repo"
+    run = repo / "outputs" / "runs" / "r1"
+    run.mkdir(parents=True)
+    working.mkdir()
+    (run / "metrics.json").write_text("{}", encoding="utf-8")
+    dest = pack_kaggle("plan 01 finished", repo=repo, working=working)
+    assert dest == working / "skex-output.zip"
+    with zipfile.ZipFile(dest) as archive:
+        assert archive.read("RUN.txt") == b"plan 01 finished\n"
+        assert "outputs/runs/r1/metrics.json" in archive.namelist()
 
 
 def test_sealed_outlines_cells_import_as_succeeded(tmp_path):
