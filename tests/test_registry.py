@@ -82,8 +82,8 @@ def test_pack_kaggle_writes_the_zip(tmp_path):
         assert "outputs/runs/r1/metrics.json" in archive.namelist()
 
 
-def test_dev_cells_are_sealed_and_test_cells_are_new(tmp_path):
-    """The four dev cells travel in sealed.jsonl. The test split is a new fingerprint.
+def test_qwen_cells_are_sealed_and_llama_cells_are_new(tmp_path):
+    """Qwen dev and Qwen test travel in sealed.jsonl. Llama is still open.
 
     registry.jsonl is gitignored, so a Kaggle clone only skips cells that
     are listed in experiments/sealed.jsonl.
@@ -107,18 +107,20 @@ def test_dev_cells_are_sealed_and_test_cells_are_new(tmp_path):
     ]
     assert [job["split"] for job in test["jobs"]] == ["test", "test", "test", "test"]
     assert [job["max_docs"] for job in test["jobs"]] == [99, 99, 99, 99]
-    assert len(set(test_fps)) == 4
+    assert test_fps == [
+        "5a187165dcc1169b",
+        "d2e84f99a8669900",
+        "0250975feee544d1",
+        "8d9cfcb6c44bdcc0",
+    ]
     assert set(dev_fps).isdisjoint(test_fps)
     reg = Registry(tmp_path / "reg.jsonl", tmp_path / "fail.jsonl")
     sealed = ROOT / "experiments" / "sealed.jsonl"
-    assert reg.import_sealed(sealed) == 4
+    assert reg.import_sealed(sealed) == 8
     assert reg.import_sealed(sealed) == 0
-    for fp in dev_fps:
+    for fp in dev_fps + test_fps:
         ok, reason = reg.should_run(fp, retry_failed=True)
         assert ok is False and "succeeded" in reason
-    for fp in test_fps:
-        ok, _reason = reg.should_run(fp, retry_failed=True)
-        assert ok is True
     llama_dev = load_plan("experiments/plans/01c_tax_zeroshot_llama_dev.yaml")
     llama_test = load_plan("experiments/plans/01d_tax_zeroshot_llama_test.yaml")
     llama_dev_fps = [fingerprint(_spec_from_job(llama_dev, job, cfg)) for job in llama_dev["jobs"]]
