@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Any
 from skex.eval.schema_check import parse_and_validate
 from skex.eval.span import span_support
-from skex.eval.field_match import field_scores
+from skex.eval.field_match import field_scores, values_match
 
 
 def score_example(
@@ -28,9 +28,8 @@ def score_example(
             if v in (None, "", []) or k in unsupported:
                 continue
             gated_n += 1
-            # crude exact membership
             gv = gmap.get(k) if gmap else None
-            if gv == v or (isinstance(gv, list) and v in gv) or (isinstance(v, list) and gv in v):
+            if values_match(gv, v):
                 gated_tp += 1
     return {
         "parse_ok": chk["parse_ok"],

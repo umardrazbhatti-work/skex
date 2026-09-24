@@ -1,7 +1,8 @@
 plan_id: tax_zeroshot_test
 description: >
   Same four cells as plan 01, on the 99 Domain-A test papers.
-  Dev fingerprints are sealed. Do not start QLoRA in this run.
+  Schema research_card.v0.2, so the sealed v0.1 rows do not skip this plan.
+  Do not start QLoRA in this run.
   Qwen2.5 1.5B and 3B are public. No HF token.
 jobs:
   - cell: A

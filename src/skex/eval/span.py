@@ -1,4 +1,5 @@
 from __future__ import annotations
+from collections import defaultdict
 from typing import Any
 
 
@@ -14,11 +15,24 @@ def quote_in_doc(quote: str, document: str) -> bool:
     return _norm(quote) in _norm(document)
 
 
+def _quotes_by_field(pred: dict[str, Any]) -> dict[str, list[str]]:
+    """Keep every quote. A later quote for the same field must not erase an earlier one."""
+    quotes: dict[str, list[str]] = defaultdict(list)
+    for span in pred.get("evidence_spans") or []:
+        if not isinstance(span, dict):
+            continue
+        field = span.get("field")
+        if not field:
+            continue
+        quotes[str(field)].append(str(span.get("quote") or ""))
+    return quotes
+
+
 def span_support(pred: dict[str, Any] | None, document: str) -> dict[str, Any]:
-    """Every non-empty atomic field should have a quote ⊆ document."""
-    if not pred:
+    """Every non-empty field is supported when any of its quotes is in the document."""
+    if not isinstance(pred, dict) or not pred:
         return {"n_non_null": 0, "n_supported": 0, "span_support": 0.0, "unsupported_fields": []}
-    spans = {s.get("field"): s.get("quote", "") for s in pred.get("evidence_spans") or [] if s.get("field")}
+    quotes = _quotes_by_field(pred)
     fields = []
     if "fields" in pred and isinstance(pred["fields"], dict):
         for k, v in pred["fields"].items():
@@ -34,8 +48,7 @@ def span_support(pred: dict[str, Any] | None, document: str) -> dict[str, Any]:
     supported = []
     unsupported = []
     for f in fields:
-        q = spans.get(f, "")
-        if quote_in_doc(str(q), document):
+        if any(quote_in_doc(q, document) for q in quotes.get(f, [])):
             supported.append(f)
         else:
             unsupported.append(f)

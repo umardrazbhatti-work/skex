@@ -38,6 +38,21 @@ def test_chat_tensors_reads_a_token_dict_not_shape():
     assert no_mask is None
 
 
+def test_bounded_prompt_keeps_a_short_string_and_clips_a_long_one():
+    from skex.decode.interface import bounded_prompt
+
+    class FakeTok:
+        def __call__(self, text, add_special_tokens=False):
+            return {"input_ids": [ord(ch) for ch in text]}
+
+        def decode(self, ids, skip_special_tokens=False):
+            return "".join(chr(i) for i in ids)
+
+    tok = FakeTok()
+    assert bounded_prompt("abcd", tok, 10) == "abcd"
+    assert bounded_prompt("abcdef", tok, 3) == "abc"
+
+
 def test_prompt_keeps_document_separate_from_schema():
     messages = build_messages("Extract a card.", "We use BERT on CoNLL.", '{"type":"object"}')
     assert messages[1]["content"] == "We use BERT on CoNLL."

@@ -29,6 +29,12 @@ def _as_set(value: Any) -> set[str]:
     return {_norm_atom(value)}
 
 
+def values_match(gold_value: Any, pred_value: Any) -> bool:
+    """Same atom comparison as field F1. Order and case do not make a match fail."""
+    pred_set = _as_set(pred_value)
+    return bool(pred_set) and pred_set == _as_set(gold_value)
+
+
 def _field_map(card: dict[str, Any] | None) -> dict[str, Any]:
     if not card:
         return {}

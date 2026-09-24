@@ -2,9 +2,17 @@
 
 Read this file first at the next session, then `GROK.md`, `docs/LOCKED_DECISIONS.md`, `docs/EXECUTION_PLAN.md`, and `docs/DATASET_INSPECTION.md`.
 
-## Resume here — saved 2026-09-24 after `Results/24-9-26 1400Hrs`
+## Resume here — checker fix, schema `research_card.v0.2`
 
-Qwen dev and Qwen test are finished and sealed. Eight fingerprints. Do not re-run them. The next Kaggle run is Llama 3.2 only. Do not start plan 02. Do not install Unsloth. Do not download a 7B.
+`Results/24-9-26 2030Hrs` finished Llama on the v0.1 checker. Those eight scores are in that zip and are not in `experiments/sealed.jsonl`. The eight Qwen rows already in that file stay as scored. Do not overwrite them.
+
+The working tree changes the checker and bumps `schema_id` to `research_card.v0.2`. A Kaggle clone therefore runs Qwen and Llama again instead of skipping the sealed v0.1 rows. Push this tree and re-upload `notebooks/skex_kaggle.ipynb` before Save & Run. The notebook clones GitHub. `HF_TOKEN` stays checked. Accelerator GPU T4 x2, Internet on, dataset `skex-datasets`. Budget about 4 hours. Plan 02 stays off.
+
+SciERC `Material` stays under `datasets`. That mapping is the recorded decision in `docs/DATASET_INSPECTION.md`.
+
+## Previous resume — 2026-09-24 after `Results/24-9-26 1400Hrs`
+
+Qwen dev and Qwen test are finished and sealed. Eight fingerprints. Do not re-run them on schema v0.1. Do not start plan 02. Do not install Unsloth. Do not download a 7B.
 
 `24-9-26 1400Hrs` is the Qwen-only test notebook. `RUN.txt` says `test plan finished`. The log ends at about 64 minutes. No crash. No Llama. That notebook did not need `HF_TOKEN`. Smoke passed. The four Qwen dev cells skipped. The four Qwen test cells finished, and the generations are in the zip.
 
@@ -21,7 +29,7 @@ Run ids: `20260923T111720Z-4ceeb1` (1.5B prompt-JSON), `20260923T113203Z-c38d53`
 
 Fence, kept separate from the table. All 99 of the 1.5B prompt completions on this test split start with a markdown ` ```json ` fence, so the saved parse rate is 0.00. The other three test cells are raw JSON.
 
-Next run: push this seal, then re-upload `notebooks/skex_kaggle.ipynb`. The `HF_TOKEN` secret stays checked. Accelerator GPU T4 x2, Internet on, dataset `skex-datasets`. The last cell skips the eight sealed Qwen cells, then runs Llama 3.2 1B and 3B, prompt-JSON then Outlines, on 50 dev papers (`01c_tax_zeroshot_llama_dev.yaml`) and 99 test papers (`01d_tax_zeroshot_llama_test.yaml`). Budget about 2 hours. Doc lines print every 10 papers. Download the zip into a new Results folder. Plan 02 stays off. `train_qlora` is still unimplemented.
+That next notebook became `Results/24-9-26 2030Hrs`. Llama finished on the v0.1 checker. The checker fix at the top of this file is the follow-up. Low field F1 on an untouched model stays the measurement.
 
 ## Previous resume — 2026-09-23 after `Results/23-9-26 1515Hrs`
 

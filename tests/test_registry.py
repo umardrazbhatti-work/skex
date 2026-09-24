@@ -82,11 +82,11 @@ def test_pack_kaggle_writes_the_zip(tmp_path):
         assert "outputs/runs/r1/metrics.json" in archive.namelist()
 
 
-def test_qwen_cells_are_sealed_and_llama_cells_are_new(tmp_path):
-    """Qwen dev and Qwen test travel in sealed.jsonl. Llama is still open.
+def test_v02_cells_run_and_sealed_v01_rows_stay_blocked(tmp_path):
+    """Schema v0.2 mints new fingerprints. The eight sealed v0.1 Qwen rows stay blocked.
 
     registry.jsonl is gitignored, so a Kaggle clone only skips cells that
-    are listed in experiments/sealed.jsonl.
+    are listed in experiments/sealed.jsonl. Those rows use research_card.v0.1.
     """
     from skex.config import load_config
     from skex.experiments.fingerprint import fingerprint
@@ -94,33 +94,51 @@ def test_qwen_cells_are_sealed_and_llama_cells_are_new(tmp_path):
     from skex.experiments.runner import _spec_from_job
     from skex.paths import ROOT
 
-    cfg = load_config()
-    dev = load_plan("experiments/plans/01_tax_zeroshot.yaml")
-    test = load_plan("experiments/plans/01b_tax_zeroshot_test.yaml")
-    dev_fps = [fingerprint(_spec_from_job(dev, job, cfg)) for job in dev["jobs"]]
-    test_fps = [fingerprint(_spec_from_job(test, job, cfg)) for job in test["jobs"]]
-    assert dev_fps == [
+    sealed_dev = [
         "998f8fafc5edf958",
         "5ea1cba6acc2e8a2",
         "cb0d9b71c2836671",
         "85edb1fb3d92e4c8",
     ]
-    assert [job["split"] for job in test["jobs"]] == ["test", "test", "test", "test"]
-    assert [job["max_docs"] for job in test["jobs"]] == [99, 99, 99, 99]
-    assert test_fps == [
+    sealed_test = [
         "5a187165dcc1169b",
         "d2e84f99a8669900",
         "0250975feee544d1",
         "8d9cfcb6c44bdcc0",
     ]
+    cfg = load_config()
+    assert cfg["schema_id"] == "research_card.v0.2"
+    dev = load_plan("experiments/plans/01_tax_zeroshot.yaml")
+    test = load_plan("experiments/plans/01b_tax_zeroshot_test.yaml")
+    dev_fps = [fingerprint(_spec_from_job(dev, job, cfg)) for job in dev["jobs"]]
+    test_fps = [fingerprint(_spec_from_job(test, job, cfg)) for job in test["jobs"]]
+    assert dev_fps == [
+        "ccc915c32da36d81",
+        "da1d605e7c7fe7d5",
+        "c78b3bc828f5789f",
+        "b3239df5871e2cfa",
+    ]
+    assert [job["split"] for job in test["jobs"]] == ["test", "test", "test", "test"]
+    assert [job["max_docs"] for job in test["jobs"]] == [99, 99, 99, 99]
+    assert test_fps == [
+        "783b1f72c0e3595f",
+        "3f848b71557eab7e",
+        "c0d773de9383c17a",
+        "2d5294ea57d5f13f",
+    ]
+    assert set(dev_fps).isdisjoint(sealed_dev)
+    assert set(test_fps).isdisjoint(sealed_test)
     assert set(dev_fps).isdisjoint(test_fps)
     reg = Registry(tmp_path / "reg.jsonl", tmp_path / "fail.jsonl")
     sealed = ROOT / "experiments" / "sealed.jsonl"
     assert reg.import_sealed(sealed) == 8
     assert reg.import_sealed(sealed) == 0
-    for fp in dev_fps + test_fps:
+    for fp in sealed_dev + sealed_test:
         ok, reason = reg.should_run(fp, retry_failed=True)
         assert ok is False and "succeeded" in reason
+    for fp in dev_fps + test_fps:
+        ok, reason = reg.should_run(fp, retry_failed=True)
+        assert ok is True and reason == "new"
     llama_dev = load_plan("experiments/plans/01c_tax_zeroshot_llama_dev.yaml")
     llama_test = load_plan("experiments/plans/01d_tax_zeroshot_llama_test.yaml")
     llama_dev_fps = [fingerprint(_spec_from_job(llama_dev, job, cfg)) for job in llama_dev["jobs"]]
@@ -133,15 +151,25 @@ def test_qwen_cells_are_sealed_and_llama_cells_are_new(tmp_path):
     ]
     assert [job["split"] for job in llama_dev["jobs"]] == ["dev", "dev", "dev", "dev"]
     assert [job["split"] for job in llama_test["jobs"]] == ["test", "test", "test", "test"]
-    assert len(set(llama_dev_fps)) == 4
-    assert len(set(llama_test_fps)) == 4
-    known = set(dev_fps) | set(test_fps)
+    assert llama_dev_fps == [
+        "00662886ed0e4b07",
+        "fc167651daa9443b",
+        "6a22d0beb474a64a",
+        "d721454cb0a44913",
+    ]
+    assert llama_test_fps == [
+        "8a161e35e9122b8e",
+        "877bf9f2a5277765",
+        "19eb8aac99ba8a53",
+        "f4579c32f1f5375a",
+    ]
+    known = set(dev_fps) | set(test_fps) | set(sealed_dev) | set(sealed_test)
     assert known.isdisjoint(llama_dev_fps)
     assert known.isdisjoint(llama_test_fps)
     assert set(llama_dev_fps).isdisjoint(llama_test_fps)
     for fp in llama_dev_fps + llama_test_fps:
-        ok, _reason = reg.should_run(fp, retry_failed=True)
-        assert ok is True
+        ok, reason = reg.should_run(fp, retry_failed=True)
+        assert ok is True and reason == "new"
 
 
 def test_block_success(tmp_path):

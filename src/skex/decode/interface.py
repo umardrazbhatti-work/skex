@@ -18,12 +18,12 @@ def card_model():
     global _CARD
     if _CARD is not None:
         return _CARD
-    from pydantic import BaseModel, ConfigDict
+    from pydantic import BaseModel, ConfigDict, Field
 
     class Score(BaseModel):
         model_config = ConfigDict(extra="forbid")
         metric: str
-        value: float | str | None = None
+        value: float | str | None
         condition: str | None = None
 
     class Span(BaseModel):
@@ -32,15 +32,16 @@ def card_model():
         quote: str
 
     class ResearchCard(BaseModel):
+        """Keys may be omitted. A score that is present still needs metric and value."""
         model_config = ConfigDict(extra="forbid")
-        task: list[str]
-        method: list[str]
-        datasets: list[str]
-        metrics: list[str]
-        scores: list[Score]
-        claims: list[str]
-        limitations: list[str]
-        evidence_spans: list[Span]
+        task: list[str] = Field(default_factory=list)
+        method: list[str] = Field(default_factory=list)
+        datasets: list[str] = Field(default_factory=list)
+        metrics: list[str] = Field(default_factory=list)
+        scores: list[Score] = Field(default_factory=list)
+        claims: list[str] = Field(default_factory=list)
+        limitations: list[str] = Field(default_factory=list)
+        evidence_spans: list[Span] = Field(default_factory=list)
 
     _CARD = ResearchCard
     return _CARD
@@ -120,21 +121,32 @@ def torch_inference():
     return torch.inference_mode()
 
 
+def bounded_prompt(prompt: str, tokenizer, max_input_tokens: int) -> str:
+    """Clip to the same token cap prompt-JSON uses. A short prompt is returned unchanged."""
+    ids = tokenizer(prompt, add_special_tokens=False)["input_ids"]
+    if len(ids) <= max_input_tokens:
+        return prompt
+    return tokenizer.decode(ids[:max_input_tokens], skip_special_tokens=False)
+
+
 def _constrained(messages, model, tokenizer, *, max_new_tokens: int, max_input_tokens: int) -> str:
     import outlines
 
     key = id(model)
     if key not in _OUTLINES:
         _OUTLINES[key] = outlines.from_transformers(model, tokenizer)
-    prompt = tokenizer.apply_chat_template(
-        messages,
-        add_generation_prompt=True,
-        tokenize=False,
+    prompt = bounded_prompt(
+        tokenizer.apply_chat_template(
+            messages,
+            add_generation_prompt=True,
+            tokenize=False,
+        ),
+        tokenizer,
+        max_input_tokens,
     )
-    # The rendered string is not truncated here; the caller already keeps documents short.
     result = _OUTLINES[key](prompt, output_type=card_model(), max_new_tokens=max_new_tokens)
     text = _as_json_text(result)
-    encoded_in = tokenizer(prompt, add_special_tokens=False, truncation=True, max_length=max_input_tokens)
+    encoded_in = tokenizer(prompt, add_special_tokens=False)
     _usage(len(encoded_in["input_ids"]), len(tokenizer(text, add_special_tokens=False)["input_ids"]))
     return text
 

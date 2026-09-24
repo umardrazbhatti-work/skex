@@ -1,8 +1,8 @@
 plan_id: tax_zeroshot_llama_dev
 description: >
   Llama 3.2 1B and 3B, prompt-JSON then Outlines, on the 50 Domain-A dev papers.
-  The license is accepted. A Kaggle secret named HF_TOKEN is required.
-  Qwen dev cells stay sealed. Do not start QLoRA in this run.
+  Schema research_card.v0.2. A Kaggle secret named HF_TOKEN is required.
+  Do not start QLoRA in this run.
 jobs:
   - cell: A
     decode_arm: prompt_json

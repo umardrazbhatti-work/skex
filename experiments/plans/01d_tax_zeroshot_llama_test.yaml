@@ -1,7 +1,8 @@
 plan_id: tax_zeroshot_llama_test
 description: >
   Same four Llama 3.2 cells on the 99 Domain-A test papers.
-  A Kaggle secret named HF_TOKEN is required. Do not start QLoRA in this run.
+  Schema research_card.v0.2. A Kaggle secret named HF_TOKEN is required.
+  Do not start QLoRA in this run.
 jobs:
   - cell: A
     decode_arm: prompt_json

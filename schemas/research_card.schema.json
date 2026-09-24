@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "skex://schemas/research_card.schema.json",
-  "title": "SKEX Research Card v0.1",
+  "$id": "skex://schemas/research_card.v0.2",
+  "title": "SKEX Research Card v0.2",
+  "description": "Every key is optional. Omit a key you cannot support with a quote from the document. Empty arrays are allowed. Do not add keys.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["task", "method", "datasets", "metrics", "scores", "claims", "limitations", "evidence_spans"],
   "properties": {
     "task": { "type": "array", "items": { "type": "string" } },
     "method": { "type": "array", "items": { "type": "string" } },

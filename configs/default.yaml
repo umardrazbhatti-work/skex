@@ -1,5 +1,5 @@
 project: skex
-schema_id: research_card.v0.1
+schema_id: research_card.v0.2
 schema_path: schemas/research_card.schema.json
 
 data:

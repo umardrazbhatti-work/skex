@@ -2,7 +2,11 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 import json
+import re
 from skex.paths import resolve
+
+_FENCE = re.compile(r"```(?:json|JSON)?[ \t]*\r?\n?(.*?)```", re.DOTALL)
+_OPEN_FENCE = re.compile(r"```(?:json|JSON)?[ \t]*\r?\n?(.*)$", re.DOTALL)
 
 _CACHE: dict[str, dict] = {}
 
@@ -62,16 +66,61 @@ def _lite_validate(obj: Any, schema: dict) -> list[str]:
     return errs
 
 
+def _json_object(text: str) -> Any:
+    """Parse one JSON object. A fence, a lead-in sentence, or trailing text may surround it."""
+    stripped = text.strip()
+    try:
+        return json.loads(stripped)
+    except json.JSONDecodeError:
+        pass
+    decoder = json.JSONDecoder()
+    last = None
+    for match in re.finditer(r"\{", stripped):
+        try:
+            obj, _end = decoder.raw_decode(stripped[match.start():])
+        except json.JSONDecodeError as exc:
+            last = exc
+            continue
+        if isinstance(obj, dict):
+            return obj
+    if last is not None:
+        raise last
+    raise json.JSONDecodeError("no JSON object", stripped, 0)
+
+
+def _candidates(raw: str) -> list[str]:
+    text = raw.strip()
+    if text.startswith("{") or text.startswith("["):
+        return [text]
+    found: list[str] = []
+    fenced = _FENCE.search(text)
+    if fenced:
+        found.append(fenced.group(1))
+    else:
+        opened = _OPEN_FENCE.search(text)
+        if opened:
+            found.append(opened.group(1))
+    found.append(text)
+    return [item.strip() for item in found if item and item.strip()]
+
+
 def parse_and_validate(raw: str | dict, schema_path: str | Path) -> dict[str, Any]:
     if isinstance(raw, dict):
-        obj = raw
+        obj: Any = raw
         parse_ok = True
     else:
-        try:
-            obj = json.loads(raw)
-            parse_ok = True
-        except json.JSONDecodeError as e:
-            return {"parsed": None, "parse_ok": False, "valid": False, "errors": [str(e)]}
+        obj = None
+        parse_ok = False
+        error = "not JSON"
+        for text in _candidates(str(raw)):
+            try:
+                obj = _json_object(text)
+                parse_ok = True
+                break
+            except json.JSONDecodeError as exc:
+                error = str(exc)
+        if not parse_ok:
+            return {"parsed": None, "parse_ok": False, "valid": False, "errors": [error]}
     if not isinstance(obj, dict):
         return {"parsed": obj, "parse_ok": True, "valid": False, "errors": ["root is not an object"]}
     errs = _validate(obj, _load_schema(schema_path))

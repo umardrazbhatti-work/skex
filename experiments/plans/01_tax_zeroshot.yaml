@@ -1,7 +1,8 @@
 plan_id: tax_zeroshot
 description: >
   Cells A/B before any SFT. Dev first.
-  Qwen2.5 1.5B and 3B are public. Llama 3.2 is gated and this Kaggle notebook has no HF_TOKEN.
+  Schema research_card.v0.2. The sealed v0.1 Qwen rows stay, and these cells run again.
+  Qwen2.5 1.5B and 3B are public.
 jobs:
   - cell: A
     decode_arm: prompt_json
