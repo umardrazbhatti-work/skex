@@ -261,3 +261,23 @@ def test_notebook_runs_the_ten_unfinished_cells_one_model_at_a_time():
     assert set(seen).isdisjoint(finished)
     assert set(seen) | finished == set(full)
     assert set(full) - finished == set(seen)
+
+
+def test_notebook_tries_both_kaggle_dataset_mounts_before_failing():
+    import json
+
+    from skex.paths import ROOT
+
+    nb = json.loads((ROOT / "notebooks" / "skex_kaggle.ipynb").read_text(encoding="utf-8"))
+    source = ""
+    for cell in nb["cells"]:
+        text = "".join(cell["source"])
+        if "DATA_CANDIDATES" in text:
+            source = text
+            break
+    assert source
+    first = "/kaggle/input/datasets/umardrazbhatti/skex-datasets"
+    second = "/kaggle/input/datasets/umardrazbhatti999/skex-datasets"
+    assert source.index(first) < source.index(second)
+    assert source.index(second) < source.index("Dataset not found")
+    assert "if DATA is None" in source
