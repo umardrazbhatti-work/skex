@@ -15,13 +15,14 @@ Agent: finish the current phase before starting the next. Update `experiments/re
 - [ ] Print split counts; stop if test ids leak into train
 
 ## Phase 2 — zero-shot tax (GPU)
-Qwen dev: `experiments/plans/01_tax_zeroshot.yaml` (finished, sealed).
-Qwen test: `experiments/plans/01b_tax_zeroshot_test.yaml`.
-Llama dev: `experiments/plans/01c_tax_zeroshot_llama_dev.yaml`.
-Llama test: `experiments/plans/01d_tax_zeroshot_llama_test.yaml`.
-- [x] Cells A/B on Qwen2.5 1.5B and 3B, dev first (50 docs). Results: `23-9-26 1515Hrs`.
-- [x] Same four Qwen cells on the 99 test papers. Results: `24-9-26 1400Hrs`.
-- [ ] Llama 3.2 1B and 3B, prompt-JSON and Outlines, dev then test. License accepted 22 Sep 2026. Needs Kaggle secret `HF_TOKEN`.
+Qwen dev: `experiments/plans/01_tax_zeroshot.yaml` (v0.1 sealed; v0.2 finished in `25-9-26 1400Hrs`).
+Qwen test: `experiments/plans/01b_tax_zeroshot_test.yaml`. The 1.5B half finished on 25 Sep. The 3B half is `experiments/plans/01e_qwen3b_test.yaml`.
+Llama 1B: `experiments/plans/01f_llama1b_dev.yaml`, then `experiments/plans/01g_llama1b_test.yaml`.
+Llama 3B: `experiments/plans/01h_llama3b_dev.yaml`, then `experiments/plans/01i_llama3b_test.yaml`.
+The Kaggle notebook runs those five plans in that order. Each plan is one process and one model.
+- [x] Cells A/B on Qwen2.5 1.5B and 3B, dev first (50 docs). Results: `23-9-26 1515Hrs`. v0.2 rerun finished in `25-9-26 1400Hrs`.
+- [x] Same four Qwen cells on the 99 test papers. Results: `24-9-26 1400Hrs`. v0.2 rerun finished the 1.5B half only.
+- [ ] Qwen2.5-3B test, then Llama 3.2 1B dev and test, then Llama 3.2 3B dev and test. Needs Kaggle secret `HF_TOKEN`.
 - [x] Dev `metrics.json` has validity, field F1, wrong-valid, span-support
 
 ## Phase 3 — QLoRA 3B Domain A

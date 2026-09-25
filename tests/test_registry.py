@@ -180,3 +180,84 @@ def test_block_success(tmp_path):
     reg.finish("r2", fp, spec, {"field_f1": 0.5})
     ok, reason = reg.should_run(fp)
     assert ok is False and "succeeded" in reason
+
+
+def test_notebook_runs_the_ten_unfinished_cells_one_model_at_a_time():
+    """The 25 Sep run finished six Qwen cells. The notebook runs the other ten.
+
+    Each phase file keeps the original plan_id, so the fingerprint matches the
+    full plan, and each process loads one model.
+    """
+    import ast
+    import json
+
+    from skex.config import load_config
+    from skex.experiments.fingerprint import fingerprint
+    from skex.experiments.plan import load_plan
+    from skex.experiments.runner import _spec_from_job
+    from skex.paths import ROOT
+
+    finished = {
+        "ccc915c32da36d81",
+        "da1d605e7c7fe7d5",
+        "c78b3bc828f5789f",
+        "b3239df5871e2cfa",
+        "783b1f72c0e3595f",
+        "3f848b71557eab7e",
+    }
+    nb = json.loads((ROOT / "notebooks" / "skex_kaggle.ipynb").read_text(encoding="utf-8"))
+    source = ""
+    for cell in nb["cells"]:
+        text = "".join(cell["source"])
+        if "PHASE_FILES" in text:
+            source = text
+            break
+    assert source
+    for old in (
+        "01_tax_zeroshot.yaml",
+        "01b_tax_zeroshot_test.yaml",
+        "01c_tax_zeroshot_llama_dev.yaml",
+        "01d_tax_zeroshot_llama_test.yaml",
+    ):
+        assert old not in source
+    phase_files = None
+    phase_order = None
+    for node in ast.parse(source).body:
+        if not isinstance(node, ast.Assign):
+            continue
+        for target in node.targets:
+            if isinstance(target, ast.Name) and target.id == "PHASE_FILES":
+                phase_files = ast.literal_eval(node.value)
+            if isinstance(target, ast.Name) and target.id == "PHASES":
+                phase_order = ast.literal_eval(node.value)
+    assert [item[1] for item in phase_order] == [
+        "experiments/plans/01e_qwen3b_test.yaml",
+        "experiments/plans/01f_llama1b_dev.yaml",
+        "experiments/plans/01g_llama1b_test.yaml",
+        "experiments/plans/01h_llama3b_dev.yaml",
+        "experiments/plans/01i_llama3b_test.yaml",
+    ]
+    assert list(phase_files) == [item[1] for item in phase_order]
+    cfg = load_config()
+    seen = []
+    for relative, text in phase_files.items():
+        assert (ROOT / relative).read_text(encoding="utf-8") == text
+        plan = load_plan(relative)
+        models = {job["model_id"] for job in plan["jobs"]}
+        assert len(models) == 1
+        assert [job["decode_arm"] for job in plan["jobs"]] == ["prompt_json", "constrained"]
+        seen.extend(fingerprint(_spec_from_job(plan, job, cfg)) for job in plan["jobs"])
+    full = []
+    for relative in (
+        "experiments/plans/01_tax_zeroshot.yaml",
+        "experiments/plans/01b_tax_zeroshot_test.yaml",
+        "experiments/plans/01c_tax_zeroshot_llama_dev.yaml",
+        "experiments/plans/01d_tax_zeroshot_llama_test.yaml",
+    ):
+        plan = load_plan(relative)
+        full.extend(fingerprint(_spec_from_job(plan, job, cfg)) for job in plan["jobs"])
+    assert len(seen) == 10
+    assert len(set(seen)) == 10
+    assert set(seen).isdisjoint(finished)
+    assert set(seen) | finished == set(full)
+    assert set(full) - finished == set(seen)

@@ -2,11 +2,13 @@
 
 Read this file first at the next session, then `GROK.md`, `docs/LOCKED_DECISIONS.md`, `docs/EXECUTION_PLAN.md`, and `docs/DATASET_INSPECTION.md`.
 
-## Resume here — checker fix, schema `research_card.v0.2`
+## Resume here — ten cells left, one model per step
 
-`Results/24-9-26 2030Hrs` finished Llama on the v0.1 checker. Those eight scores are in that zip and are not in `experiments/sealed.jsonl`. The eight Qwen rows already in that file stay as scored. Do not overwrite them.
+`Results/25-9-26 1400Hrs` is Kaggle version 13. The v0.2 checker worked. Six Qwen cells finished in about 59 minutes. The next load, Qwen2.5-3B on the test split, stuck at 49% of the weights until the 12-hour cap (exit 137). Llama did not start.
 
-The working tree changes the checker and bumps `schema_id` to `research_card.v0.2`. A Kaggle clone therefore runs Qwen and Llama again instead of skipping the sealed v0.1 rows. Push this tree and re-upload `notebooks/skex_kaggle.ipynb` before Save & Run. The notebook clones GitHub. `HF_TOKEN` stays checked. Accelerator GPU T4 x2, Internet on, dataset `skex-datasets`. Budget about 4 hours. Plan 02 stays off.
+Keep those six scores. Re-upload `notebooks/skex_kaggle.ipynb` before Save & Run. The last cell writes the five phase plans into the clone and runs them in order, each in its own process: Qwen2.5-3B test, Llama 3.2 1B dev, Llama 3.2 1B test, Llama 3.2 3B dev, Llama 3.2 3B test. That is the other ten cells. `HF_TOKEN` stays checked. Accelerator GPU T4 x2, Internet on, dataset `skex-datasets`. Budget about 4 hours. Download `skex-output.zip` into a new Results folder. Plan 02 stays off.
+
+The version 13 zip still has the six finished cells. Download it into `Results/25-9-26 1400Hrs` if that file is not already there.
 
 SciERC `Material` stays under `datasets`. That mapping is the recorded decision in `docs/DATASET_INSPECTION.md`.
 

@@ -1,0 +1,20 @@
+plan_id: tax_zeroshot_test
+description: >
+  Qwen2.5-3B on the 99 Domain-A test papers. Prompt-JSON, then Outlines.
+  The 1.5B test cells already finished in Results/25-9-26 1400Hrs.
+  This process loads only the 3B model.
+jobs:
+  - cell: A
+    decode_arm: prompt_json
+    model_id: Qwen/Qwen2.5-3B-Instruct
+    split: test
+    domain: A
+    data_rev: v0
+    max_docs: 99
+  - cell: B
+    decode_arm: constrained
+    model_id: Qwen/Qwen2.5-3B-Instruct
+    split: test
+    domain: A
+    data_rev: v0
+    max_docs: 99
