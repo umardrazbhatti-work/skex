@@ -1,17 +1,18 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "skex://schemas/research_card.v0.2",
-  "title": "SKEX Research Card v0.2",
-  "description": "Every key is optional. Omit a key you cannot support with a quote from the document. Empty arrays are allowed. Do not add keys.",
+  "$id": "skex://schemas/research_card.v1",
+  "title": "SKEX Research Card v1",
+  "description": "Every key is required. Use null when the document does not support that field. A non-null field must have a quote in evidence_spans that is a contiguous substring of the document. A score that is present still needs metric and value. Do not add keys.",
   "type": "object",
   "additionalProperties": false,
+  "required": ["task", "method", "datasets", "metrics", "scores", "claims", "limitations", "evidence_spans"],
   "properties": {
-    "task": { "type": "array", "items": { "type": "string" } },
-    "method": { "type": "array", "items": { "type": "string" } },
-    "datasets": { "type": "array", "items": { "type": "string" } },
-    "metrics": { "type": "array", "items": { "type": "string" } },
+    "task": { "type": ["array", "null"], "items": { "type": "string" } },
+    "method": { "type": ["array", "null"], "items": { "type": "string" } },
+    "datasets": { "type": ["array", "null"], "items": { "type": "string" } },
+    "metrics": { "type": ["array", "null"], "items": { "type": "string" } },
     "scores": {
-      "type": "array",
+      "type": ["array", "null"],
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -23,8 +24,8 @@
         }
       }
     },
-    "claims": { "type": "array", "items": { "type": "string" } },
-    "limitations": { "type": "array", "items": { "type": "string" } },
+    "claims": { "type": ["array", "null"], "items": { "type": "string" } },
+    "limitations": { "type": ["array", "null"], "items": { "type": "string" } },
     "evidence_spans": {
       "type": "array",
       "items": {

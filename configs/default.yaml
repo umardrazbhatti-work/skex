@@ -1,6 +1,8 @@
 project: skex
-schema_id: research_card.v0.2
+schema_id: research_card.v1
 schema_path: schemas/research_card.schema.json
+domain_b_schema_id: cord_receipt.v1
+domain_b_schema_path: schemas/cord_receipt.schema.json
 
 data:
   domain_a_dir: data/processed/domain_a

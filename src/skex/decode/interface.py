@@ -18,7 +18,7 @@ def card_model():
     global _CARD
     if _CARD is not None:
         return _CARD
-    from pydantic import BaseModel, ConfigDict, Field
+    from pydantic import BaseModel, ConfigDict
 
     class Score(BaseModel):
         model_config = ConfigDict(extra="forbid")
@@ -32,16 +32,16 @@ def card_model():
         quote: str
 
     class ResearchCard(BaseModel):
-        """Keys may be omitted. A score that is present still needs metric and value."""
+        """Every key is required. Null means the document does not support that field."""
         model_config = ConfigDict(extra="forbid")
-        task: list[str] = Field(default_factory=list)
-        method: list[str] = Field(default_factory=list)
-        datasets: list[str] = Field(default_factory=list)
-        metrics: list[str] = Field(default_factory=list)
-        scores: list[Score] = Field(default_factory=list)
-        claims: list[str] = Field(default_factory=list)
-        limitations: list[str] = Field(default_factory=list)
-        evidence_spans: list[Span] = Field(default_factory=list)
+        task: list[str] | None
+        method: list[str] | None
+        datasets: list[str] | None
+        metrics: list[str] | None
+        scores: list[Score] | None
+        claims: list[str] | None
+        limitations: list[str] | None
+        evidence_spans: list[Span]
 
     _CARD = ResearchCard
     return _CARD
@@ -49,8 +49,8 @@ def card_model():
 
 def empty_card() -> str:
     return json.dumps({
-        "task": [], "method": [], "datasets": [], "metrics": [],
-        "scores": [], "claims": [], "limitations": [], "evidence_spans": [],
+        "task": None, "method": None, "datasets": None, "metrics": None,
+        "scores": None, "claims": None, "limitations": None, "evidence_spans": [],
     })
 
 

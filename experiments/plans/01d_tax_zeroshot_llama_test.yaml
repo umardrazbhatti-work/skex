@@ -1,7 +1,7 @@
 plan_id: tax_zeroshot_llama_test
 description: >
   Same four Llama 3.2 cells on the 99 Domain-A test papers.
-  Schema research_card.v0.2. A Kaggle secret named HF_TOKEN is required.
+  Schema research_card.v1. A Kaggle secret named HF_TOKEN is required.
   Do not start QLoRA in this run.
 jobs:
   - cell: A
@@ -9,26 +9,26 @@ jobs:
     model_id: meta-llama/Llama-3.2-1B-Instruct
     split: test
     domain: A
-    data_rev: v0
-    max_docs: 99
+    data_rev: v1
+    max_docs: 200
   - cell: B
     decode_arm: constrained
     model_id: meta-llama/Llama-3.2-1B-Instruct
     split: test
     domain: A
-    data_rev: v0
-    max_docs: 99
+    data_rev: v1
+    max_docs: 200
   - cell: A
     decode_arm: prompt_json
     model_id: meta-llama/Llama-3.2-3B-Instruct
     split: test
     domain: A
-    data_rev: v0
-    max_docs: 99
+    data_rev: v1
+    max_docs: 200
   - cell: B
     decode_arm: constrained
     model_id: meta-llama/Llama-3.2-3B-Instruct
     split: test
     domain: A
-    data_rev: v0
-    max_docs: 99
+    data_rev: v1
+    max_docs: 200

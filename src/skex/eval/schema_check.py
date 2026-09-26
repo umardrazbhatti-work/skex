@@ -44,9 +44,13 @@ def _lite_validate(obj: Any, schema: dict) -> list[str]:
             sub = props.get(k)
             if not sub:
                 continue
-            if sub.get("type") == "array" and not isinstance(v, list):
+            types = sub.get("type")
+            type_list = types if isinstance(types, list) else [types]
+            if v is None and "null" in type_list:
+                continue
+            if "array" in type_list and not isinstance(v, list):
                 errs.append(f"{k} is not an array")
-            if sub.get("type") == "object" and not isinstance(v, dict):
+            if "object" in type_list and not isinstance(v, dict):
                 errs.append(f"{k} is not an object")
             if isinstance(v, list) and isinstance(sub.get("items"), dict):
                 item = sub["items"]

@@ -88,10 +88,11 @@ def test_omits_unattested_and_unmapped_types():
     assert len(test_rows) == 1
     card = test_rows[0]["output"]
     assert card["task"] == ["word alignment"]
-    assert "method" not in card
-    assert "datasets" not in card
-    assert "metrics" not in card
-    assert "claims" not in card
+    assert card["method"] is None
+    assert card["datasets"] is None
+    assert card["metrics"] is None
+    assert card["claims"] is None
+    assert card["scores"] is None
     blob = json.dumps(card)
     assert "cohesion constraint" not in blob
     assert "English phrases" not in blob

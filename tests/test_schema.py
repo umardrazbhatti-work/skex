@@ -19,8 +19,23 @@ def test_extra_key_fails():
     assert r["parse_ok"] and not r["valid"]
 
 
-def test_omitted_keys_are_valid():
+def test_missing_key_is_invalid():
     card = {"task": ["named entity recognition"], "evidence_spans": [{"field": "task", "quote": "named entity recognition"}]}
+    r = parse_and_validate(card, SCHEMA)
+    assert r["parse_ok"] and not r["valid"]
+
+
+def test_null_means_the_field_is_unsupported():
+    card = {
+        "task": ["named entity recognition"],
+        "method": None,
+        "datasets": None,
+        "metrics": None,
+        "scores": None,
+        "claims": None,
+        "limitations": None,
+        "evidence_spans": [{"field": "task", "quote": "named entity recognition"}],
+    }
     r = parse_and_validate(card, SCHEMA)
     assert r["parse_ok"] and r["valid"], r["errors"]
 

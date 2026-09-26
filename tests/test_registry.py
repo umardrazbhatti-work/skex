@@ -107,24 +107,24 @@ def test_v02_cells_run_and_sealed_v01_rows_stay_blocked(tmp_path):
         "8d9cfcb6c44bdcc0",
     ]
     cfg = load_config()
-    assert cfg["schema_id"] == "research_card.v0.2"
+    assert cfg["schema_id"] == "research_card.v1"
     dev = load_plan("experiments/plans/01_tax_zeroshot.yaml")
     test = load_plan("experiments/plans/01b_tax_zeroshot_test.yaml")
     dev_fps = [fingerprint(_spec_from_job(dev, job, cfg)) for job in dev["jobs"]]
     test_fps = [fingerprint(_spec_from_job(test, job, cfg)) for job in test["jobs"]]
     assert dev_fps == [
-        "ccc915c32da36d81",
-        "da1d605e7c7fe7d5",
-        "c78b3bc828f5789f",
-        "b3239df5871e2cfa",
+        "e4b9fe738c374c3a",
+        "2aa530ece9daa266",
+        "ce7daadc86ae85bf",
+        "3120fbd02e02cb51",
     ]
     assert [job["split"] for job in test["jobs"]] == ["test", "test", "test", "test"]
-    assert [job["max_docs"] for job in test["jobs"]] == [99, 99, 99, 99]
+    assert [job["max_docs"] for job in test["jobs"]] == [200, 200, 200, 200]
     assert test_fps == [
-        "783b1f72c0e3595f",
-        "3f848b71557eab7e",
-        "c0d773de9383c17a",
-        "2d5294ea57d5f13f",
+        "3526796082c070fa",
+        "e9a7854818bc804d",
+        "1291c18a38cb190a",
+        "6e2808a92efec10e",
     ]
     assert set(dev_fps).isdisjoint(sealed_dev)
     assert set(test_fps).isdisjoint(sealed_test)
@@ -152,16 +152,16 @@ def test_v02_cells_run_and_sealed_v01_rows_stay_blocked(tmp_path):
     assert [job["split"] for job in llama_dev["jobs"]] == ["dev", "dev", "dev", "dev"]
     assert [job["split"] for job in llama_test["jobs"]] == ["test", "test", "test", "test"]
     assert llama_dev_fps == [
-        "00662886ed0e4b07",
-        "fc167651daa9443b",
-        "6a22d0beb474a64a",
-        "d721454cb0a44913",
+        "116b8f77c1e4e793",
+        "cb61f008e8df6e96",
+        "9f024bf5f3c68c12",
+        "937334cddbd1e494",
     ]
     assert llama_test_fps == [
-        "8a161e35e9122b8e",
-        "877bf9f2a5277765",
-        "19eb8aac99ba8a53",
-        "f4579c32f1f5375a",
+        "e14002a5e6fd256a",
+        "9942f6c93147728f",
+        "f6e7f4be78cf0eab",
+        "58b6a7dca45bfdb8",
     ]
     known = set(dev_fps) | set(test_fps) | set(sealed_dev) | set(sealed_test)
     assert known.isdisjoint(llama_dev_fps)
@@ -182,11 +182,11 @@ def test_block_success(tmp_path):
     assert ok is False and "succeeded" in reason
 
 
-def test_notebook_runs_the_ten_unfinished_cells_one_model_at_a_time():
-    """The 25 Sep run finished six Qwen cells. The notebook runs the other ten.
+def test_notebook_runs_every_phase2_cell_one_model_at_a_time():
+    """Phase 2 runs all 16 zero-shot cells. Each process loads one model.
 
     Each phase file keeps the original plan_id, so the fingerprint matches the
-    full plan, and each process loads one model.
+    full plan.
     """
     import ast
     import json
@@ -197,14 +197,6 @@ def test_notebook_runs_the_ten_unfinished_cells_one_model_at_a_time():
     from skex.experiments.runner import _spec_from_job
     from skex.paths import ROOT
 
-    finished = {
-        "ccc915c32da36d81",
-        "da1d605e7c7fe7d5",
-        "c78b3bc828f5789f",
-        "b3239df5871e2cfa",
-        "783b1f72c0e3595f",
-        "3f848b71557eab7e",
-    }
     nb = json.loads((ROOT / "notebooks" / "skex_kaggle.ipynb").read_text(encoding="utf-8"))
     source = ""
     for cell in nb["cells"]:
@@ -231,11 +223,14 @@ def test_notebook_runs_the_ten_unfinished_cells_one_model_at_a_time():
             if isinstance(target, ast.Name) and target.id == "PHASES":
                 phase_order = ast.literal_eval(node.value)
     assert [item[1] for item in phase_order] == [
-        "experiments/plans/01e_qwen3b_test.yaml",
         "experiments/plans/01f_llama1b_dev.yaml",
         "experiments/plans/01g_llama1b_test.yaml",
         "experiments/plans/01h_llama3b_dev.yaml",
         "experiments/plans/01i_llama3b_test.yaml",
+        "experiments/plans/01l_qwen3b_dev.yaml",
+        "experiments/plans/01e_qwen3b_test.yaml",
+        "experiments/plans/01j_qwen15b_dev.yaml",
+        "experiments/plans/01k_qwen15b_test.yaml",
     ]
     assert list(phase_files) == [item[1] for item in phase_order]
     cfg = load_config()
@@ -256,11 +251,10 @@ def test_notebook_runs_the_ten_unfinished_cells_one_model_at_a_time():
     ):
         plan = load_plan(relative)
         full.extend(fingerprint(_spec_from_job(plan, job, cfg)) for job in plan["jobs"])
-    assert len(seen) == 10
-    assert len(set(seen)) == 10
-    assert set(seen).isdisjoint(finished)
-    assert set(seen) | finished == set(full)
-    assert set(full) - finished == set(seen)
+    assert len(seen) == 16
+    assert len(set(seen)) == 16
+    assert set(seen) == set(full)
+    assert "skex.experiments.tax_table" in source
 
 
 def test_notebook_tries_both_kaggle_dataset_mounts_before_failing():
@@ -281,3 +275,5 @@ def test_notebook_tries_both_kaggle_dataset_mounts_before_failing():
     assert source.index(first) < source.index(second)
     assert source.index(second) < source.index("Dataset not found")
     assert "if DATA is None" in source
+    assert "730" in source and "126" in source and "175" in source
+    assert 'schema_line != "schema_id: research_card.v1"' in source

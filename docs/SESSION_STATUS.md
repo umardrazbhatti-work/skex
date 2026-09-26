@@ -2,13 +2,13 @@
 
 Read this file first at the next session, then `GROK.md`, `docs/LOCKED_DECISIONS.md`, `docs/EXECUTION_PLAN.md`, and `docs/DATASET_INSPECTION.md`.
 
-## Resume here — ten cells left, one model per step
+## Resume here — Phase 1 of the proposal
 
-`Results/25-9-26 1400Hrs` is Kaggle version 13. The v0.2 checker worked. Six Qwen cells finished in about 59 minutes. The next load, Qwen2.5-3B on the test split, stuck at 49% of the weights until the 12-hour cap (exit 137). Llama did not start.
+The work plan is the 21 September 2026 proposal, written out as phases in `docs/EXECUTION_PLAN.md`. Phase 1 is built: `research_card.v1` (null when a field is unsupported), Domain A 730/126/175, Domain B CORD 800/100/100. Phase 2 is the open phase. The notebook scores all sixteen zero-shot cells and writes `experiments/phase2_tax.md` only after every cell finishes. Do not start QLoRA.
 
-Keep those six scores. Re-upload `notebooks/skex_kaggle.ipynb` before Save & Run. The last cell writes the five phase plans into the clone and runs them in order, each in its own process: Qwen2.5-3B test, Llama 3.2 1B dev, Llama 3.2 1B test, Llama 3.2 3B dev, Llama 3.2 3B test. That is the other ten cells. `HF_TOKEN` stays checked. Accelerator GPU T4 x2, Internet on, dataset `skex-datasets`. Budget about 4 hours. Download `skex-output.zip` into a new Results folder. Plan 02 stays off.
+Before Save & Run: upload `C:\Users\PC1\Desktop\Specialization Beats Scale G\skex-datasets.zip` as a new version of the Kaggle dataset `skex-datasets`, re-upload `notebooks/skex_kaggle.ipynb`, keep Internet on, keep GPU T4 x2, and keep the `HF_TOKEN` secret checked. The data cell stops unless the clone is `research_card.v1` and Domain A is 730/126/175. Download `skex-output.zip` into a new Results folder when the log says the tax table was written.
 
-The version 13 zip still has the six finished cells. Download it into `Results/25-9-26 1400Hrs` if that file is not already there.
+`Results/25-9-26 2000Hrs` is the newest Kaggle run. It finished the ten cells that `25-9-26 1400Hrs` did not finish. Those scores use schema v0.2, which allowed a missing key. They are a pilot, not the proposal table.
 
 SciERC `Material` stays under `datasets`. That mapping is the recorded decision in `docs/DATASET_INSPECTION.md`.
 

@@ -23,16 +23,24 @@ from skex.data.splits import assert_no_doc_leak, assert_no_id_leak
 
 INSTRUCTION = (
     "Extract a research card from the document. "
-    "Return JSON using only these keys when a value is a contiguous substring of the document: "
+    "Return JSON with every one of these keys: "
     "task, method, datasets, metrics, scores, claims, limitations, evidence_spans. "
-    "Omit keys you cannot support. Do not add values that are not written in the document. "
-    'evidence_spans is a list of objects {"field", "quote"} where quote is an exact substring of the document.'
+    "Use null when the document does not support that field. "
+    "Do not add values that are not written in the document. "
+    'evidence_spans is a list of objects {"field", "quote"} where quote is an exact substring of the document '
+    "and field is a non-null card field."
 )
 
 _JSON_CONTEXTS = {"json", "jsonlines"}
 _SPLIT_ALIAS = {"train": "train", "dev": "dev", "validation": "dev", "valid": "dev", "test": "test"}
 _RANK = {"test": 2, "dev": 1, "train": 0}
-_NER_MAP = {"task": "task", "method": "method", "metric": "metrics", "material": "datasets"}
+_NER_MAP = {
+    "task": "task",
+    "method": "method",
+    "metric": "metrics",
+    "material": "datasets",
+    "dataset": "datasets",
+}
 _NER_EXTRA = {"generic", "otherscientificterm"}
 _CARD_KEYS = ("task", "method", "datasets", "metrics", "scores", "claims", "limitations")
 _LIST_FIELDS = ("task", "method", "datasets", "metrics", "claims", "limitations")
@@ -118,9 +126,17 @@ def _is_ner(obj: dict[str, Any]) -> bool:
     return bool(norms & set(_NER_MAP))
 
 
+def _blank_card() -> dict[str, Any]:
+    card: dict[str, Any] = {field: None for field in _LIST_FIELDS}
+    card["scores"] = None
+    card["evidence_spans"] = []
+    return card
+
+
 def _finish_card(buckets: dict[str, list[str]], document: str) -> dict[str, Any] | None:
-    card: dict[str, Any] = {}
+    card = _blank_card()
     spans: list[dict[str, str]] = []
+    kept_any = False
     for field in _LIST_FIELDS:
         kept: list[str] = []
         for raw in buckets.get(field) or []:
@@ -132,7 +148,8 @@ def _finish_card(buckets: dict[str, list[str]], document: str) -> dict[str, Any]
                 spans.append({"field": field, "quote": quote})
         if kept:
             card[field] = kept
-    if not card:
+            kept_any = True
+    if not kept_any:
         return None
     card["evidence_spans"] = spans
     return card
@@ -182,7 +199,7 @@ def _map_card(obj: dict[str, Any], document: str) -> dict[str, Any] | None:
         field = _norm_key(key)
         if field in _LIST_FIELDS:
             buckets[field].extend(_string_items(value))
-    card = _finish_card(buckets, document) or {}
+    card = _finish_card(buckets, document) or _blank_card()
     scores, score_spans = _map_scores(obj.get("scores"), document)
     if scores:
         card["scores"] = scores
@@ -194,7 +211,7 @@ def _map_card(obj: dict[str, Any], document: str) -> dict[str, Any] | None:
             card["metrics"] = metrics
         card.setdefault("evidence_spans", [])
         card["evidence_spans"].extend(score_spans)
-    if not card:
+    if card.get("scores") is None and all(card.get(field) is None for field in _LIST_FIELDS):
         return None
     card.setdefault("evidence_spans", [])
     return card

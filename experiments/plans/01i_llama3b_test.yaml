@@ -1,6 +1,6 @@
 plan_id: tax_zeroshot_llama_test
 description: >
-  Llama 3.2 3B, prompt-JSON then Outlines, on the 99 Domain-A test papers.
+  Llama 3.2 3B, prompt-JSON then Outlines, on the Domain A test papers.
   This process loads only the 3B model. HF_TOKEN is required.
 jobs:
   - cell: A
@@ -8,12 +8,12 @@ jobs:
     model_id: meta-llama/Llama-3.2-3B-Instruct
     split: test
     domain: A
-    data_rev: v0
-    max_docs: 99
+    data_rev: v1
+    max_docs: 200
   - cell: B
     decode_arm: constrained
     model_id: meta-llama/Llama-3.2-3B-Instruct
     split: test
     domain: A
-    data_rev: v0
-    max_docs: 99
+    data_rev: v1
+    max_docs: 200

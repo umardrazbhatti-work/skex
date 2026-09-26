@@ -8,7 +8,7 @@ from skex.decode.interface import FROZEN_ENGINE, build_messages, empty_card, gen
 def test_smoke_card_is_json():
     raw = generate("doc", arm="smoke", engine="none")
     card = json.loads(raw)
-    assert card["task"] == []
+    assert card["task"] is None
     assert card["evidence_spans"] == []
     assert raw == empty_card()
 

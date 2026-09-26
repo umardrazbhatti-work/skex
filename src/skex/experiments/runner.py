@@ -34,7 +34,7 @@ def _spec_from_job(plan: dict, job: dict, cfg: dict) -> dict:
         "adapter_id": job.get("adapter_id"),
         "decode_arm": job.get("decode_arm", "prompt_json"),
         "decode_engine": cfg["decode"]["engine"] if job.get("decode_arm") == "constrained" else "none",
-        "schema_id": cfg["schema_id"],
+        "schema_id": job.get("schema_id") or cfg["schema_id"],
         "split": job.get("split", "dev"),
         "data_rev": job.get("data_rev", "v0"),
         "seq_len": cfg["train"]["seq_len"],

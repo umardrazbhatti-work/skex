@@ -1,19 +1,19 @@
-plan_id: tax_zeroshot_test
+plan_id: tax_zeroshot
 description: >
-  Qwen2.5-3B, prompt-JSON then Outlines, on the Domain A test papers.
+  Qwen2.5-3B, prompt-JSON then Outlines, on the Domain A dev papers.
   Schema research_card.v1. This process loads only the 3B model.
 jobs:
   - cell: A
     decode_arm: prompt_json
     model_id: Qwen/Qwen2.5-3B-Instruct
-    split: test
+    split: dev
     domain: A
     data_rev: v1
-    max_docs: 200
+    max_docs: 150
   - cell: B
     decode_arm: constrained
     model_id: Qwen/Qwen2.5-3B-Instruct
-    split: test
+    split: dev
     domain: A
     data_rev: v1
-    max_docs: 200
+    max_docs: 150

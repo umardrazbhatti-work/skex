@@ -1,7 +1,7 @@
 plan_id: tax_zeroshot
 description: >
   Cells A/B before any SFT. Dev first.
-  Schema research_card.v0.2. The sealed v0.1 Qwen rows stay, and these cells run again.
+  Schema research_card.v1. The sealed v0.1 Qwen rows stay, and these cells run again.
   Qwen2.5 1.5B and 3B are public.
 jobs:
   - cell: A
@@ -9,26 +9,26 @@ jobs:
     model_id: Qwen/Qwen2.5-1.5B-Instruct
     split: dev
     domain: A
-    data_rev: v0
+    data_rev: v1
     max_docs: 150
   - cell: B
     decode_arm: constrained
     model_id: Qwen/Qwen2.5-1.5B-Instruct
     split: dev
     domain: A
-    data_rev: v0
+    data_rev: v1
     max_docs: 150
   - cell: A
     decode_arm: prompt_json
     model_id: Qwen/Qwen2.5-3B-Instruct
     split: dev
     domain: A
-    data_rev: v0
+    data_rev: v1
     max_docs: 150
   - cell: B
     decode_arm: constrained
     model_id: Qwen/Qwen2.5-3B-Instruct
     split: dev
     domain: A
-    data_rev: v0
+    data_rev: v1
     max_docs: 150

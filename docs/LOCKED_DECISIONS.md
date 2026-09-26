@@ -1,6 +1,8 @@
 # Locked decisions
 
-These are closed. Do not re-litigate in code comments or new markdown files.
+The supervisor proposal of 21 September 2026 is the authority. The phase list is `docs/EXECUTION_PLAN.md`. Where this file is narrower than that proposal, follow the proposal.
+
+These choices stay closed. Do not re-litigate them in code comments or new markdown files.
 
 ## Paper
 - Title: When Does Specialization Beat Scale for Structured Knowledge Extraction?

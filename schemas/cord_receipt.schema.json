@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "skex://schemas/cord_receipt.v1",
+  "title": "SKEX CORD receipt v1",
+  "description": "Every key is required. Use null when the receipt text does not contain that value. A non-null value must appear as a contiguous substring of the receipt text. Do not add keys.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "menu",
+    "subtotal_price",
+    "tax_price",
+    "service_price",
+    "discount_price",
+    "total_price",
+    "cashprice",
+    "changeprice",
+    "creditcardprice",
+    "emoneyprice",
+    "evidence_spans"
+  ],
+  "properties": {
+    "menu": {
+      "type": ["array", "null"],
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["nm", "cnt", "price", "unitprice"],
+        "properties": {
+          "nm": { "type": ["string", "null"] },
+          "cnt": { "type": ["string", "null"] },
+          "price": { "type": ["string", "null"] },
+          "unitprice": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "subtotal_price": { "type": ["string", "null"] },
+    "tax_price": { "type": ["string", "null"] },
+    "service_price": { "type": ["string", "null"] },
+    "discount_price": { "type": ["string", "null"] },
+    "total_price": { "type": ["string", "null"] },
+    "cashprice": { "type": ["string", "null"] },
+    "changeprice": { "type": ["string", "null"] },
+    "creditcardprice": { "type": ["string", "null"] },
+    "emoneyprice": { "type": ["string", "null"] },
+    "evidence_spans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["field", "quote"],
+        "properties": {
+          "field": { "type": "string" },
+          "quote": { "type": "string" }
+        }
+      }
+    }
+  }
+}

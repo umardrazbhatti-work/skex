@@ -1,7 +1,7 @@
 plan_id: tax_zeroshot_test
 description: >
   Same four cells as plan 01, on the 99 Domain-A test papers.
-  Schema research_card.v0.2, so the sealed v0.1 rows do not skip this plan.
+  Schema research_card.v1, so the sealed v0.1 rows do not skip this plan.
   Do not start QLoRA in this run.
   Qwen2.5 1.5B and 3B are public. No HF token.
 jobs:
@@ -10,26 +10,26 @@ jobs:
     model_id: Qwen/Qwen2.5-1.5B-Instruct
     split: test
     domain: A
-    data_rev: v0
-    max_docs: 99
+    data_rev: v1
+    max_docs: 200
   - cell: B
     decode_arm: constrained
     model_id: Qwen/Qwen2.5-1.5B-Instruct
     split: test
     domain: A
-    data_rev: v0
-    max_docs: 99
+    data_rev: v1
+    max_docs: 200
   - cell: A
     decode_arm: prompt_json
     model_id: Qwen/Qwen2.5-3B-Instruct
     split: test
     domain: A
-    data_rev: v0
-    max_docs: 99
+    data_rev: v1
+    max_docs: 200
   - cell: B
     decode_arm: constrained
     model_id: Qwen/Qwen2.5-3B-Instruct
     split: test
     domain: A
-    data_rev: v0
-    max_docs: 99
+    data_rev: v1
+    max_docs: 200

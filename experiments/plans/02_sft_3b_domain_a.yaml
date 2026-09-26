@@ -10,7 +10,7 @@ jobs:
     model_id: Qwen/Qwen2.5-3B-Instruct
     split: train
     domain: A
-    data_rev: v0
+    data_rev: v1
     train_examples: 344
     epochs: 2
   - cell: C
@@ -19,11 +19,11 @@ jobs:
     adapter_id: domain_a_3b_v0
     split: test
     domain: A
-    data_rev: v0
+    data_rev: v1
   - cell: D
     decode_arm: constrained
     model_id: Qwen/Qwen2.5-3B-Instruct
     adapter_id: domain_a_3b_v0
     split: test
     domain: A
-    data_rev: v0
+    data_rev: v1
